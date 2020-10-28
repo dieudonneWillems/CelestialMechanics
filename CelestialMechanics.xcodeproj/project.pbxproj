@@ -10,6 +10,26 @@
 		C7D702CB2546CDD00090DB36 /* CelestialMechanics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7D702C12546CDD00090DB36 /* CelestialMechanics.framework */; };
 		C7D702D02546CDD00090DB36 /* CelestialMechanicsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D702CF2546CDD00090DB36 /* CelestialMechanicsTests.swift */; };
 		C7D702D22546CDD00090DB36 /* CelestialMechanics.h in Headers */ = {isa = PBXBuildFile; fileRef = C7D702C42546CDD00090DB36 /* CelestialMechanics.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		C7D703022546CEC40090DB36 /* icrs.ephem in Resources */ = {isa = PBXBuildFile; fileRef = C7D702F22546CEC40090DB36 /* icrs.ephem */; };
+		C7D703032546CEC40090DB36 /* geocentricmeanecliptic.ephem in Resources */ = {isa = PBXBuildFile; fileRef = C7D702F32546CEC40090DB36 /* geocentricmeanecliptic.ephem */; };
+		C7D703042546CEC40090DB36 /* mars.ephem in Resources */ = {isa = PBXBuildFile; fileRef = C7D702F42546CEC40090DB36 /* mars.ephem */; };
+		C7D703052546CEC40090DB36 /* jupiter.ephem in Resources */ = {isa = PBXBuildFile; fileRef = C7D702F52546CEC40090DB36 /* jupiter.ephem */; };
+		C7D703072546CEC40090DB36 /* uranus.ephem in Resources */ = {isa = PBXBuildFile; fileRef = C7D702F72546CEC40090DB36 /* uranus.ephem */; };
+		C7D703082546CEC40090DB36 /* moon.ephem in Resources */ = {isa = PBXBuildFile; fileRef = C7D702F82546CEC40090DB36 /* moon.ephem */; };
+		C7D703092546CEC40090DB36 /* venus.ephem in Resources */ = {isa = PBXBuildFile; fileRef = C7D702F92546CEC40090DB36 /* venus.ephem */; };
+		C7D7030A2546CEC40090DB36 /* mercury.ephem in Resources */ = {isa = PBXBuildFile; fileRef = C7D702FA2546CEC40090DB36 /* mercury.ephem */; };
+		C7D7030B2546CEC40090DB36 /* fk5.ephem in Resources */ = {isa = PBXBuildFile; fileRef = C7D702FB2546CEC40090DB36 /* fk5.ephem */; };
+		C7D7030C2546CEC40090DB36 /* geocentrictrueecliptic.ephem in Resources */ = {isa = PBXBuildFile; fileRef = C7D702FC2546CEC40090DB36 /* geocentrictrueecliptic.ephem */; };
+		C7D7030D2546CEC40090DB36 /* neptune.ephem in Resources */ = {isa = PBXBuildFile; fileRef = C7D702FD2546CEC40090DB36 /* neptune.ephem */; };
+		C7D7030E2546CEC40090DB36 /* pluto.ephem in Resources */ = {isa = PBXBuildFile; fileRef = C7D702FE2546CEC40090DB36 /* pluto.ephem */; };
+		C7D7030F2546CEC40090DB36 /* fk4.ephem in Resources */ = {isa = PBXBuildFile; fileRef = C7D702FF2546CEC40090DB36 /* fk4.ephem */; };
+		C7D703102546CEC40090DB36 /* sun.ephem in Resources */ = {isa = PBXBuildFile; fileRef = C7D703002546CEC40090DB36 /* sun.ephem */; };
+		C7D703112546CEC40090DB36 /* saturn.ephem in Resources */ = {isa = PBXBuildFile; fileRef = C7D703012546CEC40090DB36 /* saturn.ephem */; };
+		C7D703172546CF360090DB36 /* CelestialObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D703162546CF360090DB36 /* CelestialObject.swift */; };
+		C7D7031B2546CF550090DB36 /* Coordinates.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D7031A2546CF550090DB36 /* Coordinates.swift */; };
+		C7D7031F2546DAFD0090DB36 /* Interpolation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D7031E2546DAFD0090DB36 /* Interpolation.swift */; };
+		C7D70325254710C80090DB36 /* Date+CMextensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D70324254710C80090DB36 /* Date+CMextensions.swift */; };
+		C7D70329254716720090DB36 /* Ephemerides.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D70328254716720090DB36 /* Ephemerides.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -29,6 +49,26 @@
 		C7D702CA2546CDD00090DB36 /* CelestialMechanicsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CelestialMechanicsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C7D702CF2546CDD00090DB36 /* CelestialMechanicsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CelestialMechanicsTests.swift; sourceTree = "<group>"; };
 		C7D702D12546CDD00090DB36 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C7D702F22546CEC40090DB36 /* icrs.ephem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = icrs.ephem; path = ../../../ephemerides/icrs.ephem; sourceTree = "<group>"; };
+		C7D702F32546CEC40090DB36 /* geocentricmeanecliptic.ephem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = geocentricmeanecliptic.ephem; path = ../../../ephemerides/geocentricmeanecliptic.ephem; sourceTree = "<group>"; };
+		C7D702F42546CEC40090DB36 /* mars.ephem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = mars.ephem; path = ../../../ephemerides/mars.ephem; sourceTree = "<group>"; };
+		C7D702F52546CEC40090DB36 /* jupiter.ephem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = jupiter.ephem; path = ../../../ephemerides/jupiter.ephem; sourceTree = "<group>"; };
+		C7D702F72546CEC40090DB36 /* uranus.ephem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = uranus.ephem; path = ../../../ephemerides/uranus.ephem; sourceTree = "<group>"; };
+		C7D702F82546CEC40090DB36 /* moon.ephem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = moon.ephem; path = ../../../ephemerides/moon.ephem; sourceTree = "<group>"; };
+		C7D702F92546CEC40090DB36 /* venus.ephem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = venus.ephem; path = ../../../ephemerides/venus.ephem; sourceTree = "<group>"; };
+		C7D702FA2546CEC40090DB36 /* mercury.ephem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = mercury.ephem; path = ../../../ephemerides/mercury.ephem; sourceTree = "<group>"; };
+		C7D702FB2546CEC40090DB36 /* fk5.ephem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = fk5.ephem; path = ../../../ephemerides/fk5.ephem; sourceTree = "<group>"; };
+		C7D702FC2546CEC40090DB36 /* geocentrictrueecliptic.ephem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = geocentrictrueecliptic.ephem; path = ../../../ephemerides/geocentrictrueecliptic.ephem; sourceTree = "<group>"; };
+		C7D702FD2546CEC40090DB36 /* neptune.ephem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = neptune.ephem; path = ../../../ephemerides/neptune.ephem; sourceTree = "<group>"; };
+		C7D702FE2546CEC40090DB36 /* pluto.ephem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = pluto.ephem; path = ../../../ephemerides/pluto.ephem; sourceTree = "<group>"; };
+		C7D702FF2546CEC40090DB36 /* fk4.ephem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = fk4.ephem; path = ../../../ephemerides/fk4.ephem; sourceTree = "<group>"; };
+		C7D703002546CEC40090DB36 /* sun.ephem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = sun.ephem; path = ../../../ephemerides/sun.ephem; sourceTree = "<group>"; };
+		C7D703012546CEC40090DB36 /* saturn.ephem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = saturn.ephem; path = ../../../ephemerides/saturn.ephem; sourceTree = "<group>"; };
+		C7D703162546CF360090DB36 /* CelestialObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CelestialObject.swift; sourceTree = "<group>"; };
+		C7D7031A2546CF550090DB36 /* Coordinates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinates.swift; sourceTree = "<group>"; };
+		C7D7031E2546DAFD0090DB36 /* Interpolation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interpolation.swift; sourceTree = "<group>"; };
+		C7D70324254710C80090DB36 /* Date+CMextensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+CMextensions.swift"; sourceTree = "<group>"; };
+		C7D70328254716720090DB36 /* Ephemerides.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ephemerides.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +111,9 @@
 		C7D702C32546CDD00090DB36 /* CelestialMechanics */ = {
 			isa = PBXGroup;
 			children = (
+				C7D703142546CED50090DB36 /* Model */,
+				C7D703152546CEF20090DB36 /* Utils */,
+				C7D702F12546CE530090DB36 /* Ephemerides */,
 				C7D702C42546CDD00090DB36 /* CelestialMechanics.h */,
 				C7D702C52546CDD00090DB36 /* Info.plist */,
 			);
@@ -84,6 +127,47 @@
 				C7D702D12546CDD00090DB36 /* Info.plist */,
 			);
 			path = CelestialMechanicsTests;
+			sourceTree = "<group>";
+		};
+		C7D702F12546CE530090DB36 /* Ephemerides */ = {
+			isa = PBXGroup;
+			children = (
+				C7D702FF2546CEC40090DB36 /* fk4.ephem */,
+				C7D702FB2546CEC40090DB36 /* fk5.ephem */,
+				C7D702F32546CEC40090DB36 /* geocentricmeanecliptic.ephem */,
+				C7D702FC2546CEC40090DB36 /* geocentrictrueecliptic.ephem */,
+				C7D702F22546CEC40090DB36 /* icrs.ephem */,
+				C7D702F52546CEC40090DB36 /* jupiter.ephem */,
+				C7D702F42546CEC40090DB36 /* mars.ephem */,
+				C7D702FA2546CEC40090DB36 /* mercury.ephem */,
+				C7D702F82546CEC40090DB36 /* moon.ephem */,
+				C7D702FD2546CEC40090DB36 /* neptune.ephem */,
+				C7D702FE2546CEC40090DB36 /* pluto.ephem */,
+				C7D703012546CEC40090DB36 /* saturn.ephem */,
+				C7D703002546CEC40090DB36 /* sun.ephem */,
+				C7D702F72546CEC40090DB36 /* uranus.ephem */,
+				C7D702F92546CEC40090DB36 /* venus.ephem */,
+			);
+			path = Ephemerides;
+			sourceTree = "<group>";
+		};
+		C7D703142546CED50090DB36 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				C7D703162546CF360090DB36 /* CelestialObject.swift */,
+				C7D7031A2546CF550090DB36 /* Coordinates.swift */,
+				C7D70324254710C80090DB36 /* Date+CMextensions.swift */,
+				C7D70328254716720090DB36 /* Ephemerides.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		C7D703152546CEF20090DB36 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				C7D7031E2546DAFD0090DB36 /* Interpolation.swift */,
+			);
+			path = Utils;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -147,6 +231,7 @@
 				TargetAttributes = {
 					C7D702C02546CDD00090DB36 = {
 						CreatedOnToolsVersion = 12.1;
+						LastSwiftMigration = 1210;
 					};
 					C7D702C92546CDD00090DB36 = {
 						CreatedOnToolsVersion = 12.1;
@@ -177,6 +262,21 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C7D703082546CEC40090DB36 /* moon.ephem in Resources */,
+				C7D7030D2546CEC40090DB36 /* neptune.ephem in Resources */,
+				C7D703092546CEC40090DB36 /* venus.ephem in Resources */,
+				C7D703032546CEC40090DB36 /* geocentricmeanecliptic.ephem in Resources */,
+				C7D703102546CEC40090DB36 /* sun.ephem in Resources */,
+				C7D703072546CEC40090DB36 /* uranus.ephem in Resources */,
+				C7D703112546CEC40090DB36 /* saturn.ephem in Resources */,
+				C7D7030E2546CEC40090DB36 /* pluto.ephem in Resources */,
+				C7D7030C2546CEC40090DB36 /* geocentrictrueecliptic.ephem in Resources */,
+				C7D7030A2546CEC40090DB36 /* mercury.ephem in Resources */,
+				C7D7030B2546CEC40090DB36 /* fk5.ephem in Resources */,
+				C7D703052546CEC40090DB36 /* jupiter.ephem in Resources */,
+				C7D7030F2546CEC40090DB36 /* fk4.ephem in Resources */,
+				C7D703042546CEC40090DB36 /* mars.ephem in Resources */,
+				C7D703022546CEC40090DB36 /* icrs.ephem in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -194,6 +294,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C7D703172546CF360090DB36 /* CelestialObject.swift in Sources */,
+				C7D70329254716720090DB36 /* Ephemerides.swift in Sources */,
+				C7D7031B2546CF550090DB36 /* Coordinates.swift in Sources */,
+				C7D7031F2546DAFD0090DB36 /* Interpolation.swift in Sources */,
+				C7D70325254710C80090DB36 /* Date+CMextensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -341,6 +446,7 @@
 		C7D702D62546CDD00090DB36 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = J2S9726G2L;
@@ -357,6 +463,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = lapsedpacifist.com.CelestialMechanics;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -365,6 +472,7 @@
 		C7D702D72546CDD00090DB36 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = J2S9726G2L;
@@ -389,6 +497,7 @@
 		C7D702D92546CDD00090DB36 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = J2S9726G2L;
 				INFOPLIST_FILE = CelestialMechanicsTests/Info.plist;
@@ -407,6 +516,7 @@
 		C7D702DA2546CDD00090DB36 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = J2S9726G2L;
 				INFOPLIST_FILE = CelestialMechanicsTests/Info.plist;
