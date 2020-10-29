@@ -7,7 +7,9 @@
 
 import Foundation
 
-
+/**
+ * This structure represents a location of the Earth. It contains a latitude, longitude and elevation.
+ */
 public struct GeographicLocation : Hashable, Equatable {
     
     /**
@@ -23,6 +25,11 @@ public struct GeographicLocation : Hashable, Equatable {
      */
     public let longitude: Double
     
+    /**
+     * The elevation above sea level in meters. This property is optional.
+     */
+    public let elevation: Double?
+    
     
     /**
      * Creates a new ´GeographicalLocation´ with the specified latitude and longitude.
@@ -31,40 +38,157 @@ public struct GeographicLocation : Hashable, Equatable {
      * negative. The latitude is given in radians.
      * - Parameter longitude: The longitude of the geographical location. West is positive and east
      * negative. The latitude is given in radians.
+     * - Parameter elevation: The elevation above sea level in meters. This value is optional.
      */
-    public init(latitude: Double, longitude: Double) {
+    public init(latitude: Double, longitude: Double, elevation: Double?=nil) {
         self.latitude = latitude
         self.longitude = longitude
+        self.elevation = elevation
     }
     
+    /**
+     * Tests whether two geographical locations are equal (i..e. specify the same position on the globe).
+     * Both geographical longitude, latitude and elevation of the sight should be the same.
+     *
+     * - Parameter lhs: The left hand side geographical location in the comparisson.
+     * - Parameter rhs: The right hand side geographical location in the comparisson.
+     * - Returns: `true` when the locations are equal.
+     */
     public static func == (lhs: GeographicLocation, rhs: GeographicLocation) -> Bool {
-        return (lhs.latitude == rhs.latitude && lhs.longitude == rhs.longitude)
+        return (lhs.latitude == rhs.latitude && lhs.longitude == rhs.longitude && lhs.elevation == rhs.elevation)
     }
 }
 
+/**
+ * Am enumeration of the different types of coordinate frames that can be used.
+ *
+ *`ICRF` is the default coordinate frame type as it is calibrated to extragalactic sources and should, therefore,
+ * be the most consistent.
+ *
+ *`ICRS`, `FK4` and `FK5` are all equatorial systems where the zero point is defined
+ * to be the vernal equinox of the Sun and the north pole is aligned with the Earth's rotation axis. Due to
+ * precession, these positions will slowly change, therefore, the `Fk4` and `FK5` frames are always
+ * given for a specific equinox (date). The most commonly used frame is the `FK5` frame for the
+ * equinox of J2000.0 (i.e first of January 2000 at 12pm).
+ *
+ * `meanEcliptical` and `trueEcliptical` are both ecliptical coordinate systems where the zero
+ * point is also defined to be the vernal equinox of the Sun, but the principal plane is defined to be the
+ * trajectory of the Sun during the year, which is known as the ecliptic. The difference between the
+ * `meanEcliptical` and the `trueEcliptical` frame is that the mean ecliptical frame only takes the
+ * precession into account, while the true ecliptical frame also takes smaller variations, like those due to
+ * nutation, into account. The mean ecliptical frame can be defined for a standard epoch like J2000.0, so that
+ * the positions can be more easily compared to each other. Both the mean and true ecliptical frames can
+ * be defined to the ecliptic of date, meaning the the intersection between the equator and ecliptic (the
+ * vernal equinox) of a specific date is used as reference.
+ *
+ * The `galactic` frame is used for specifying locations with respect to the Milky Way. The zero point is
+ * defined to be a position pointing to the centre of the Milky Way as seen from Earth. The principal plane is
+ * the plane of the Milky Way as seen from Earth.
+ *
+ * A `horizonal` coordinate frame is theframe specific for a specific geographic location on Earth and
+ * specific to a specific date and time. It gives the observer the coordinates in the sky for his location.
+ */
 public enum CoordinateFrameType {
-    case ICRS
+    
+    /**
+     * The ICRF frame that is defined to the positions of extragalactic (quasar) sources. It superseded the
+     * FK4 and FK5 systems that were based on versions of the catalogue of fundamental stars.
+     */
+    case ICRF
+    
+    /**
+     * The FK4 equatorial frame. An equatorial coordinate system that is  based on the fourth  catalogue
+     * of fundamental stars created in 1963. It was superseded by the FK5 system and later by the
+     * ICRF frame.
+     */
     case FK4
+    
+    /**
+     * The FK5 equatorial frame. An equatorial coordinate system that is  based on the fifth  catalogue
+     * of fundamental stars created in 1988. It was superseded by the ICRF frame.
+     */
     case FK5
+    
+    /**
+     * The ecliptial coordinate frame base on the mean equator of either a standard epoch or of a specific
+     * date. The mean equator takes into account the changes due to precession but not to the smaller
+     * changes such as those due to nutation.
+     */
     case meanEcliptical
+    
+    /**
+     * The ecliptial coordinate frame base on the true equator of a specific date. The mean equator takes
+     * into account the changes due to precession but not to the smaller
+     * changes such as those due to nutation.
+     */
     case trueEcliptical
+    
+    /**
+     * The galactic coordinate frame, based on the plane of the Milky Way projected onto the celestial
+     * sphere. The zero point (i.e. zero longitude and zero latitude) is in the direction of the centre of
+     * the Milky Way.
+     */
     case galactic
+    
+    /**
+     * The horizontal coordinate frame is specific to an observer at a specific location on the Earth and
+     * at a specific time. Coordinate in this frame are used to specify the location of an object in the
+     * sky as visible at a specific time for an observer.
+     */
     case horizontal
 }
 
+
+/**
+ * Represents the origin of the coordinate frane. Common origins are the geocentric origin, where the
+ * centre of the Earth is taken as the origin, and topocentric, where the position of an observer on the
+ * Earth is used as the origin.
+ */
 public enum CoordinateFrameOrigin : Equatable {
+    
+    /**
+     * The centre of the Earth as origin of the coordinate frame.
+     */
     case geocentric
+    
+    /**
+     * The centre of the Sun as origin of the coordinate frame.
+     */
     case heliocentric
+    
+    /**
+     * A location at a specific location on Earth at a specific time as origin of the coordinate frame.
+     *
+     * - Parameter location: The geographic location.
+     */
     case topocentric(location: GeographicLocation)
     
+    /**
+     * Tests whether two origins are the same. They can only be the same when they are in the same
+     * location in space.
+     *
+     *- Parameter lhs: The left hand side of the equality equation.
+     *- Parameter lhs: The right hand side of the equality equation.
+     */
     public static func == (lhs: CoordinateFrameOrigin, rhs: CoordinateFrameOrigin) -> Bool {
+        if case CoordinateFrameOrigin.geocentric = lhs, case CoordinateFrameOrigin.geocentric = rhs {
+            return true
+        }
+        if case CoordinateFrameOrigin.heliocentric = lhs, case CoordinateFrameOrigin.heliocentric = rhs {
+            return true
+        }
+        if case CoordinateFrameOrigin.topocentric(let locationLhs) = lhs, case CoordinateFrameOrigin.topocentric(let locationRhs) = rhs {
+            if locationLhs == locationRhs {
+                return true
+            }
+        }
         return false
     }
 }
 
 public struct CoordinateFrame : Equatable {
     
-    public static let ICRS = CoordinateFrame(type: .ICRS, equinox: nil)
+    public static let ICRS = CoordinateFrame(type: .ICRF, equinox: nil)
     public static let galactic = CoordinateFrame(type: .galactic, equinox: nil)
     public static let B1900 = CoordinateFrame(type: .FK4, equinox: Date.B1900)
     public static let B1950 = CoordinateFrame(type: .FK4, equinox: Date.B1950)
@@ -82,22 +206,22 @@ public struct CoordinateFrame : Equatable {
     
     public let type: CoordinateFrameType
     public let equinox: Date?
+    public let origin: CoordinateFrameOrigin
     
-    private init(type: CoordinateFrameType, equinox: Date?) {
+    private init(type: CoordinateFrameType, origin: CoordinateFrameOrigin = .geocentric, equinox: Date?) {
         self.type = type
         self.equinox = equinox
+        self.origin = origin
     }
     
     public static func == (lhs: CoordinateFrame, rhs: CoordinateFrame) -> Bool {
         if lhs.type == rhs.type {
-            if lhs.type == .FK5 || lhs.type == .FK4 || lhs.type == .meanEcliptical || lhs.type == .trueEcliptical {
+            if lhs.type == .FK5 || lhs.type == .FK4 || lhs.type == .meanEcliptical || lhs.type == .trueEcliptical || lhs.type == .horizontal {
                 if lhs.equinox != rhs.equinox {
                     return false
                 }
-            } else if lhs.type == .horizontal {
-                
             }
-            return true
+            return lhs.origin == rhs.origin
         }
         return false
     }
@@ -189,7 +313,7 @@ public struct SphericalCoordinates : CustomStringConvertible {
     public var description: String {
         get {
             var string = ""
-            if frame.type == .FK4 || frame.type == .FK5 || frame.type == .ICRS {
+            if frame.type == .FK4 || frame.type == .FK5 || frame.type == .ICRF {
                 string = "ɑ = \(self.longitude*180/Double.pi)°  δ = \(self.latitude*180/Double.pi)°"
             } else if frame.type == .meanEcliptical || frame.type == .trueEcliptical {
                 string = "λ = \(self.longitude*180/Double.pi)°  β = \(self.latitude*180/Double.pi)°"
@@ -214,7 +338,7 @@ public struct SphericalCoordinates : CustomStringConvertible {
                     string = "(J\(frame.equinox!.julianEpoch))  \(string)"
                 }
             } else {
-                if frame.type == .ICRS {
+                if frame.type == .ICRF {
                     string = "(ICRS)  \(string)"
                 }
             }
@@ -286,7 +410,7 @@ public struct RectangularCoordinates {
                     string = "(J\(frame.equinox!.julianEpoch))  \(string)"
                 }
             } else {
-                if frame.type == .ICRS {
+                if frame.type == .ICRF {
                     string = "(ICRS)  \(string)"
                 }
             }
@@ -322,7 +446,7 @@ public struct RectangularCoordinates {
     
     private static func rotationFactors(for frame: CoordinateFrame, at equinox: Date?) -> [(cosRotation: Double, sinRotation: Double)] {
         var interpolation : InterpolationTimeSeries?
-        if frame.type == .ICRS {
+        if frame.type == .ICRF {
             interpolation = Ephemerides.EPHEM_COORDSYS_ICRS
         } else if frame.type == .FK5 {
             interpolation = Ephemerides.EPHEM_COORDSYS_FK5
