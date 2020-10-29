@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C779687A254B7835003179E2 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7796879254B7835003179E2 /* Types.swift */; };
 		C7D702CB2546CDD00090DB36 /* CelestialMechanics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7D702C12546CDD00090DB36 /* CelestialMechanics.framework */; };
 		C7D702D02546CDD00090DB36 /* CelestialMechanicsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D702CF2546CDD00090DB36 /* CelestialMechanicsTests.swift */; };
 		C7D702D22546CDD00090DB36 /* CelestialMechanics.h in Headers */ = {isa = PBXBuildFile; fileRef = C7D702C42546CDD00090DB36 /* CelestialMechanics.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -43,6 +44,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C7796879254B7835003179E2 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
 		C7D702C12546CDD00090DB36 /* CelestialMechanics.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CelestialMechanics.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C7D702C42546CDD00090DB36 /* CelestialMechanics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CelestialMechanics.h; sourceTree = "<group>"; };
 		C7D702C52546CDD00090DB36 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -158,6 +160,7 @@
 				C7D7031A2546CF550090DB36 /* Coordinates.swift */,
 				C7D70324254710C80090DB36 /* Date+CMextensions.swift */,
 				C7D70328254716720090DB36 /* Ephemerides.swift */,
+				C7796879254B7835003179E2 /* Types.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -297,6 +300,7 @@
 				C7D703172546CF360090DB36 /* CelestialObject.swift in Sources */,
 				C7D70329254716720090DB36 /* Ephemerides.swift in Sources */,
 				C7D7031B2546CF550090DB36 /* Coordinates.swift in Sources */,
+				C779687A254B7835003179E2 /* Types.swift in Sources */,
 				C7D7031F2546DAFD0090DB36 /* Interpolation.swift in Sources */,
 				C7D70325254710C80090DB36 /* Date+CMextensions.swift in Sources */,
 			);
