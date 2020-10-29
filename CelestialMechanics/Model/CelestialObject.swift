@@ -9,9 +9,13 @@ import Foundation
 
 public protocol CelestialObject {
     
-    func sphericalCoordinates(at epoch: Date, inCoordinateFrame frame: CoordinateFrame)
-    func rectangularCoordinates(at epoch: Date, inCoordinateFrame frame: CoordinateFrame)
-    func visualMagnitude(at epoch: Date)
+    func sphericalCoordinates(at epoch: Date, inCoordinateFrame frame: CoordinateFrame) -> SphericalCoordinates
+    func rectangularCoordinates(at epoch: Date, inCoordinateFrame frame: CoordinateFrame) -> RectangularCoordinates
+    func visualMagnitude(at epoch: Date) -> Magnitude
+    
+    func rising(at epoch: Date, for location: GeographicLocation) -> Date
+    func transit(at epoch: Date, for location: GeographicLocation) -> Date
+    func setting(at epoch: Date, for location: GeographicLocation) -> Date
     
 }
 
