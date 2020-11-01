@@ -47,6 +47,30 @@ public struct GeographicLocation : Hashable, Equatable {
     }
     
     /**
+     * The mean sidereal time at the current date and time and at this geographical location.
+     *
+     * The mean sidereal time does not take into account the effects of nutation.
+     */
+    public var meanSiderealTime: Double {
+        get {
+            let date = Date()
+            return self.meanSiderealTime(at: date)
+        }
+    }
+    
+    /**
+     * Returns the mean sidereal time at this geographical location at the specified date.
+     *
+     * The mean sidereal time does not take into account the effects of nutation.
+     *
+     * - Parameter date: The date for which the sidereal time is requested.
+     * - Returns: The mean sidereal time at the specified date.
+     */
+    public func meanSiderealTime(at date: Date) -> Double {
+        return date.meanSiderealTime(at: self)
+    }
+    
+    /**
      * Tests whether two geographical locations are equal (i..e. specify the same position on the globe).
      * Both geographical longitude, latitude and elevation of the sight should be the same.
      *
@@ -310,6 +334,35 @@ public struct SphericalCoordinates : CustomStringConvertible {
             P = P + 2 * Double.pi
         }
         return P
+    }
+    
+    public func isCircumpolar(at location: GeographicLocation) -> Bool {
+        return false
+    }
+    
+    public func isNeverVisible(at location: GeographicLocation) -> Bool {
+        return false
+    }
+    
+    public func rising(at location: GeographicLocation) -> Date? {
+        if self.isCircumpolar(at: location) || self.isNeverVisible(at: location) {
+            return nil
+        }
+        return nil
+    }
+    
+    public func transit(at location: GeographicLocation) -> Date? {
+        if self.isNeverVisible(at: location) {
+            return nil
+        }
+        return nil
+    }
+    
+    public func setting(at location: GeographicLocation) -> Date? {
+        if self.isCircumpolar(at: location) || self.isNeverVisible(at: location) {
+            return nil
+        }
+        return nil
     }
     
     public var description: String {
