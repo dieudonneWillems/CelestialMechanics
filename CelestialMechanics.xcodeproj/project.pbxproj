@@ -8,8 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		C779687A254B7835003179E2 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7796879254B7835003179E2 /* Types.swift */; };
+		C7796880254C2188003179E2 /* SolarSystemTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C779687F254C2188003179E2 /* SolarSystemTestCase.swift */; };
+		C7796886254E2FBF003179E2 /* DateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7796885254E2FBF003179E2 /* DateTests.swift */; };
 		C7D702CB2546CDD00090DB36 /* CelestialMechanics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7D702C12546CDD00090DB36 /* CelestialMechanics.framework */; };
-		C7D702D02546CDD00090DB36 /* CelestialMechanicsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D702CF2546CDD00090DB36 /* CelestialMechanicsTests.swift */; };
+		C7D702D02546CDD00090DB36 /* CoordinatesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D702CF2546CDD00090DB36 /* CoordinatesTests.swift */; };
 		C7D702D22546CDD00090DB36 /* CelestialMechanics.h in Headers */ = {isa = PBXBuildFile; fileRef = C7D702C42546CDD00090DB36 /* CelestialMechanics.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C7D703022546CEC40090DB36 /* icrs.ephem in Resources */ = {isa = PBXBuildFile; fileRef = C7D702F22546CEC40090DB36 /* icrs.ephem */; };
 		C7D703032546CEC40090DB36 /* geocentricmeanecliptic.ephem in Resources */ = {isa = PBXBuildFile; fileRef = C7D702F32546CEC40090DB36 /* geocentricmeanecliptic.ephem */; };
@@ -45,11 +47,13 @@
 
 /* Begin PBXFileReference section */
 		C7796879254B7835003179E2 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
+		C779687F254C2188003179E2 /* SolarSystemTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolarSystemTestCase.swift; sourceTree = "<group>"; };
+		C7796885254E2FBF003179E2 /* DateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateTests.swift; sourceTree = "<group>"; };
 		C7D702C12546CDD00090DB36 /* CelestialMechanics.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CelestialMechanics.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C7D702C42546CDD00090DB36 /* CelestialMechanics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CelestialMechanics.h; sourceTree = "<group>"; };
 		C7D702C52546CDD00090DB36 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C7D702CA2546CDD00090DB36 /* CelestialMechanicsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CelestialMechanicsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		C7D702CF2546CDD00090DB36 /* CelestialMechanicsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CelestialMechanicsTests.swift; sourceTree = "<group>"; };
+		C7D702CF2546CDD00090DB36 /* CoordinatesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinatesTests.swift; sourceTree = "<group>"; };
 		C7D702D12546CDD00090DB36 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C7D702F22546CEC40090DB36 /* icrs.ephem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = icrs.ephem; path = ../../../ephemerides/icrs.ephem; sourceTree = "<group>"; };
 		C7D702F32546CEC40090DB36 /* geocentricmeanecliptic.ephem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = geocentricmeanecliptic.ephem; path = ../../../ephemerides/geocentricmeanecliptic.ephem; sourceTree = "<group>"; };
@@ -125,7 +129,9 @@
 		C7D702CE2546CDD00090DB36 /* CelestialMechanicsTests */ = {
 			isa = PBXGroup;
 			children = (
-				C7D702CF2546CDD00090DB36 /* CelestialMechanicsTests.swift */,
+				C7D702CF2546CDD00090DB36 /* CoordinatesTests.swift */,
+				C779687F254C2188003179E2 /* SolarSystemTestCase.swift */,
+				C7796885254E2FBF003179E2 /* DateTests.swift */,
 				C7D702D12546CDD00090DB36 /* Info.plist */,
 			);
 			path = CelestialMechanicsTests;
@@ -310,7 +316,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C7D702D02546CDD00090DB36 /* CelestialMechanicsTests.swift in Sources */,
+				C7796880254C2188003179E2 /* SolarSystemTestCase.swift in Sources */,
+				C7796886254E2FBF003179E2 /* DateTests.swift in Sources */,
+				C7D702D02546CDD00090DB36 /* CoordinatesTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
