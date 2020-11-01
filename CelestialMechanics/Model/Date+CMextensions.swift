@@ -9,9 +9,6 @@ import Foundation
 
 public extension Date {
     
-    /** The number of radians in a degree. */
-    private static let rpi = 180.0/Double.pi
-    
     /* The Julian Day corresponding to B1900. */
     private static let julianDayB1900 = 2415020.3135
     
@@ -286,7 +283,7 @@ public extension Date {
         get {
             let T = self.julianCenturyAtMidnight
             let Θ_0 = 100.46061837 + 36000.770053608*T + 0.000387933*T*T - T*T*T/38710000
-            return (Θ_0 / Date.rpi).normalisedAngle
+            return (Θ_0 / Double.rpi).normalisedAngle
         }
     }
     
@@ -300,7 +297,7 @@ public extension Date {
             let jd = self.julianDay
             let T = self.julianCentury
             let θ_0 = 280.46061837 + 360.98564736629*(jd-2451545.0) + 0.000387933*T*T - T*T*T/38710000
-            return (θ_0 / Date.rpi).normalisedAngle
+            return (θ_0 / Double.rpi).normalisedAngle
         }
     }
     
@@ -321,6 +318,11 @@ public extension Date {
 
 
 public extension Double {
+    
+    /**
+     * The number of radians in a degree.
+     */
+    static let rpi = 180.0/Double.pi
     
     /**
      * The normalised (to the range `[0, 2π)`).

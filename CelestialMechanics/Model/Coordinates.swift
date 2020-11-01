@@ -219,6 +219,10 @@ public struct CoordinateFrame : Equatable {
     public static let J2000 = CoordinateFrame(type: .FK5, equinox: Date.J2000)
     public static let J2050 = CoordinateFrame(type: .FK5, equinox: Date.J2050)
     
+    public static func equatorial(on epoch: Date) -> CoordinateFrame {
+        return CoordinateFrame(type: .FK5, equinox: epoch)
+    }
+    
     /*
     case galactic
     case fk4(equinox: Date)
@@ -252,6 +256,12 @@ public struct CoordinateFrame : Equatable {
 }
 
 public struct SphericalCoordinates : CustomStringConvertible {
+    
+    /**
+     * The mean atmospheric refraction of a body near the horizon. The body will become visible
+     * when it is 0° 34´ below the horizon.
+     */
+    public static let meanAtmosphericRefraction = 34.0/60.0/Double.rpi
     
     public let longitude: Double
     
@@ -336,33 +346,91 @@ public struct SphericalCoordinates : CustomStringConvertible {
         return P
     }
     
+    /**
+     * Returns `true` when a body at these coordinates will always be above the horizon (i.e. be
+     * **circumpolar**) at the specified location.
+     *
+     * If the body is not circumpolar, it may still be above the horizon at certain times.
+     * This function takes into account the atmospheric refraction when the celestial body is near the horizon.
+     *
+     * - Parameter location: The geographic location for which one want to determine if a body at
+     * specific coordinates is circumpolar.
+     * - Returns: `true` when the coordinates are circumpolar, `false` when not.
+     */
     public func isCircumpolar(at location: GeographicLocation) -> Bool {
+        if location.latitude > 0.0 {
+            if self.latitude >= 0.5*Double.pi - location.latitude - SphericalCoordinates.meanAtmosphericRefraction {
+                return true
+            }
+        } else if location.latitude < 0.0 {
+            if self.latitude <= -0.5*Double.pi - location.latitude + SphericalCoordinates.meanAtmosphericRefraction {
+                return true
+            }
+        }
         return false
     }
     
-    public func isNeverVisible(at location: GeographicLocation) -> Bool {
+    /**
+     * Returns `true` when a body at these coordinates will never be above the horizon at the specified
+     * location.
+     *
+     * This function takes into account the atmospheric refraction when the celestial body is near the horizon.
+     *
+     * - Parameter location: The geographic location for which one want to determine if a body at
+     * specific coordinates are is never above the horizon.
+     * - Returns: `true` when the coordinates are never above the horizon, `false` when they are.
+     */
+    public func isNeverAboveHorizon(at location: GeographicLocation) -> Bool {
+        if location.latitude > 0.0 {
+            if self.latitude < -0.5*Double.pi + location.latitude - SphericalCoordinates.meanAtmosphericRefraction {
+                return true
+            }
+        } else if location.latitude < 0.0 {
+            if self.latitude > 0.5*Double.pi + location.latitude + SphericalCoordinates.meanAtmosphericRefraction {
+                return true
+            }
+        }
         return false
     }
     
-    public func rising(at location: GeographicLocation) -> Date? {
-        if self.isCircumpolar(at: location) || self.isNeverVisible(at: location) {
-            return nil
+    public func risingTransitAndSetting(at date: Date, and location: GeographicLocation, degreesBelowTheHorizon h0: Double = SphericalCoordinates.meanAtmosphericRefraction) throws -> (rising: Date?, transit: Date, setting: Date?, antiTransit: Date) {
+        var rising: Date? = nil
+        var transit: Date? = nil
+        var setting: Date? = nil
+        var antiTransit: Date? = nil
+        let coordinates = try self.transform(to: CoordinateFrame.equatorial(on: date))
+        let cosH0 = (sin(h0) - sin(location.latitude) * sin(coordinates.latitude)) / (cos(location.latitude)*cos(coordinates.latitude))
+        let Θ0 = date.meanSiderealTimeAtGreenwichAtMidnight
+        var m0 = (coordinates.longitude - location.longitude - Θ0) / (2*Double.pi)
+        let jd0UT = Double(Int(date.julianDay - 0.5)) + 0.5
+        if fabs(cosH0) <= 1.0 {
+            let H0 = cos(cosH0)
+            var m1 = m0 - H0 / (2*Double.pi)
+            var m2 = m0 + H0 / (2*Double.pi)
+            if m1 < 0.0 {
+                m1 = m1 + 1.0
+            }
+            if m2 < 0.0 {
+                m2 = m2 + 1.0
+            }
+            let jd1 = jd0UT + m1
+            let jd2 = jd0UT + m2
+            rising = Date(julianDay: jd1)
+            setting = Date(julianDay: jd2)
         }
-        return nil
-    }
-    
-    public func transit(at location: GeographicLocation) -> Date? {
-        if self.isNeverVisible(at: location) {
-            return nil
+        if m0 < 0.0 {
+            m0 = m0 + 1.0
         }
-        return nil
-    }
-    
-    public func setting(at location: GeographicLocation) -> Date? {
-        if self.isCircumpolar(at: location) || self.isNeverVisible(at: location) {
-            return nil
+        let jd0 = jd0UT + m0
+        transit = Date(julianDay: jd0)
+        // 0.4986347859 is half a sidereal day in solar days
+        var ma = m0 + 0.4986347859
+        if m0 > 0.5 {
+            ma = m0 - 0.4986347859
         }
-        return nil
+        let jda = jd0UT + ma
+        antiTransit = Date(julianDay: jda)
+        return (rising: rising, transit: transit!, setting: setting, antiTransit: antiTransit!)
     }
     
     public var description: String {

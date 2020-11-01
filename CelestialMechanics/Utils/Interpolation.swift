@@ -71,6 +71,7 @@ struct InterpolationTimeSeries {
             }
             index = index + 1
         }
+        print("Using ephemerides aroung: JD\(rows[closestIndex].date.julianDay)")
         let n = (time.timeIntervalSince1970 - rows[closestIndex].date.timeIntervalSince1970) / (rows[closestIndex+1].date.timeIntervalSince1970 - rows[closestIndex].date.timeIntervalSince1970)
         var interpolatedValues = [Double]()
         for j in 0...rows[closestIndex].values.count-1 {

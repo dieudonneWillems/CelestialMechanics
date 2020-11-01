@@ -57,6 +57,26 @@ class CoordinatesTests: XCTestCase {
         XCTAssertEqual(try coord2.positionAngle(withRespectTo: coord), 1.5*Double.pi)
         XCTAssertNotEqual(try coord2.positionAngle(withRespectTo: coord), 0.5*Double.pi)
     }
+    
+    func testRisingTransitAndSetting() throws {
+        let calendar = Calendar.current
+        var dateComponents = DateComponents()
+        dateComponents.year = 2020
+        dateComponents.month = 11
+        dateComponents.day = 2
+        dateComponents.timeZone = TimeZone(abbreviation: "GMT")
+        dateComponents.hour = 0
+        dateComponents.minute = 0
+        dateComponents.second = 0
+        let date = calendar.date(from: dateComponents)!
+        print("date: \(date)  JD\(date.julianDay)")
+        let eidsvoll = GeographicLocation(latitude: 60.331/Double.rpi, longitude: 11.263/Double.rpi)
+        let sun = Sun.sun
+        let coordinates = try sun.sphericalCoordinates(at: date, inCoordinateFrame: .ICRS)
+        print("Sun: \(coordinates)")
+        let rts = try coordinates.risingTransitAndSetting(at: date, and: eidsvoll)
+        print("rise: \(rts.rising)  transit: \(rts.transit)  set: \(rts.setting)  antitransit: \(rts.antiTransit)")
+    }
 
     func testPerformanceExample() throws {
         // This is an example of a performance test case.
