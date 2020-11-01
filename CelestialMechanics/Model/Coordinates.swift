@@ -264,9 +264,9 @@ public struct SphericalCoordinates : CustomStringConvertible {
         self.frame = frame
     }
     
-    public func transform(to frame: CoordinateFrame) -> SphericalCoordinates {
+    public func transform(to frame: CoordinateFrame) throws -> SphericalCoordinates {
         let rectCoord = self.rectangularCoordinates
-        let transformedRectCoord = rectCoord.transform(to: frame)
+        let transformedRectCoord = try rectCoord.transform(to: frame)
         let transformedCoord = transformedRectCoord.sphericalCoordinates
         return transformedCoord
     }
@@ -282,8 +282,8 @@ public struct SphericalCoordinates : CustomStringConvertible {
         }
     }
     
-    public func angularSeparation(with coordinates: SphericalCoordinates) -> Double {
-        let transformedCoordinates = coordinates.transform(to: self.frame)
+    public func angularSeparation(with coordinates: SphericalCoordinates) throws -> Double {
+        let transformedCoordinates = try coordinates.transform(to: self.frame)
         let x = cos(self.latitude)*sin(transformedCoordinates.latitude) - sin(self.latitude)*cos(transformedCoordinates.latitude) * cos(transformedCoordinates.longitude - self.longitude)
         let y = cos(transformedCoordinates.latitude) * sin(transformedCoordinates.longitude - self.longitude)
         let z = sin(self.latitude)*sin(transformedCoordinates.latitude) + cos(self.latitude)*cos(transformedCoordinates.latitude) * cos(transformedCoordinates.longitude - self.longitude)
@@ -299,9 +299,11 @@ public struct SphericalCoordinates : CustomStringConvertible {
      * - Parameter coordinates: The coordinates, where the position angle is calculates in respect
      * of.
      * - Returns: The position angle in radians.
+     * - Throws `epochOutOfEphemerisRange`: When the coordinates could not be transformed to
+     * the correct coordinate frame because the equinox was out of the range of the ephemeris.
      */
-    public func positionAngle(withRespectTo coordinates: SphericalCoordinates) -> Double {
-        let transformedCoordinates = coordinates.transform(to: self.frame)
+    public func positionAngle(withRespectTo coordinates: SphericalCoordinates) throws -> Double {
+        let transformedCoordinates = try coordinates.transform(to: self.frame)
         let Δlon = self.longitude - transformedCoordinates.longitude
         var P = atan2(sin(Δlon), cos(transformedCoordinates.latitude)*tan(self.latitude) - sin(transformedCoordinates.latitude)*cos(Δlon))
         if P < 0.0 {
@@ -373,8 +375,8 @@ public struct RectangularCoordinates {
     
     public let frame: CoordinateFrame
     
-    public func transform(to frame: CoordinateFrame) -> RectangularCoordinates {
-        return RectangularCoordinates.transformCoordinates(coordinates: self, to: frame)
+    public func transform(to frame: CoordinateFrame) throws -> RectangularCoordinates {
+        return try RectangularCoordinates.transformCoordinates(coordinates: self, to: frame)
     }
     
     public var sphericalCoordinates : SphericalCoordinates {
@@ -444,7 +446,7 @@ public struct RectangularCoordinates {
         return newCoord
     }
     
-    private static func rotationFactors(for frame: CoordinateFrame, at equinox: Date?) -> [(cosRotation: Double, sinRotation: Double)] {
+    private static func rotationFactors(for frame: CoordinateFrame, at equinox: Date?) throws -> [(cosRotation: Double, sinRotation: Double)] {
         var interpolation : InterpolationTimeSeries?
         if frame.type == .ICRF {
             interpolation = Ephemerides.EPHEM_COORDSYS_ICRS
@@ -466,11 +468,11 @@ public struct RectangularCoordinates {
         if equinox != nil {
             date = equinox!
         }
-        let values = interpolation!.interpolatedValues(time: date)
+        let values = try interpolation!.interpolatedValues(time: date)
         return [(cosRotation: values[0], sinRotation: values[1]), (cosRotation: values[2], sinRotation: values[3]), (cosRotation: values[4], sinRotation: values[5])]
     }
 
-    private static func transformCoordinates(coordinates: RectangularCoordinates, to frame: CoordinateFrame) -> RectangularCoordinates {
+    private static func transformCoordinates(coordinates: RectangularCoordinates, to frame: CoordinateFrame) throws -> RectangularCoordinates {
         // TODO: Transformation to correct origin.
         
         if coordinates.frame == .ICRS && frame == .ICRS {
@@ -482,11 +484,11 @@ public struct RectangularCoordinates {
         var newCoordinates = (x:coordinates.x, y:coordinates.y, z:coordinates.z)
         
         if coordinates.frame != .galactic {
-            let rotationFactors = RectangularCoordinates.rotationFactors(for: coordinates.frame, at: coordinates.frame.equinox)
+            let rotationFactors = try RectangularCoordinates.rotationFactors(for: coordinates.frame, at: coordinates.frame.equinox)
             newCoordinates = RectangularCoordinates.rotateToGalactic(coordinates: newCoordinates, rotationFactors: rotationFactors)
         }
         if frame != .galactic {
-            let rotationFactors = RectangularCoordinates.rotationFactors(for: frame, at: frame.equinox)
+            let rotationFactors = try RectangularCoordinates.rotationFactors(for: frame, at: frame.equinox)
             newCoordinates = RectangularCoordinates.rotateFromGalactic(coordinates: newCoordinates, rotationFactors: rotationFactors)
         }
         return RectangularCoordinates(x: newCoordinates.x, y: newCoordinates.y, z: newCoordinates.z, frame: frame)

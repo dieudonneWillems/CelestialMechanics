@@ -7,6 +7,11 @@
 
 import Foundation
 
+
+enum InterpolationException : Error {
+    case epochOutOfEphemerisRange
+}
+
 struct InterpolationValueRow {
     
     let date : Date
@@ -26,7 +31,6 @@ struct InterpolationTimeSeries {
         }
         do {
             let contents = try String(contentsOf: url!, encoding: .ascii)
-            print(contents)
             let lines = contents.split(separator: "\n")
             for line in lines {
                 let items = line.split(separator: "|")
@@ -47,11 +51,14 @@ struct InterpolationTimeSeries {
         }
     }
     
-    func interpolatedValues(time: Date) -> [Double] {
+    func interpolatedValues(time: Date) throws -> [Double] {
         let start = findIndex(time: time, start: 0, end: rows.count) - 2
         var closestIndex = start
         var index = start
         let end = start+5
+        if start <= 2 || end >= rows.count-2 {
+            throw InterpolationException.epochOutOfEphemerisRange
+        }
         if index < 0 {
             index = 0
         }
