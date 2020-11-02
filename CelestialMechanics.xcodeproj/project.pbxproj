@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C7109B9A255048BD001EA538 /* test-cases.dat in Resources */ = {isa = PBXBuildFile; fileRef = C7109B99255048BD001EA538 /* test-cases.dat */; };
 		C779687A254B7835003179E2 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7796879254B7835003179E2 /* Types.swift */; };
 		C7796880254C2188003179E2 /* SolarSystemTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C779687F254C2188003179E2 /* SolarSystemTestCase.swift */; };
 		C7796886254E2FBF003179E2 /* DateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7796885254E2FBF003179E2 /* DateTests.swift */; };
@@ -46,6 +47,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C7109B99255048BD001EA538 /* test-cases.dat */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "test-cases.dat"; sourceTree = "<group>"; };
 		C7796879254B7835003179E2 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
 		C779687F254C2188003179E2 /* SolarSystemTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolarSystemTestCase.swift; sourceTree = "<group>"; };
 		C7796885254E2FBF003179E2 /* DateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateTests.swift; sourceTree = "<group>"; };
@@ -96,6 +98,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		C7109B9825504860001EA538 /* Test Cases */ = {
+			isa = PBXGroup;
+			children = (
+				C7109B99255048BD001EA538 /* test-cases.dat */,
+			);
+			path = "Test Cases";
+			sourceTree = "<group>";
+		};
 		C7D702B72546CDCF0090DB36 = {
 			isa = PBXGroup;
 			children = (
@@ -129,6 +139,7 @@
 		C7D702CE2546CDD00090DB36 /* CelestialMechanicsTests */ = {
 			isa = PBXGroup;
 			children = (
+				C7109B9825504860001EA538 /* Test Cases */,
 				C7D702CF2546CDD00090DB36 /* CoordinatesTests.swift */,
 				C779687F254C2188003179E2 /* SolarSystemTestCase.swift */,
 				C7796885254E2FBF003179E2 /* DateTests.swift */,
@@ -293,6 +304,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C7109B9A255048BD001EA538 /* test-cases.dat in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

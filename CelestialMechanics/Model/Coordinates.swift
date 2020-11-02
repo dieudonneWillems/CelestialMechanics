@@ -393,18 +393,38 @@ public struct SphericalCoordinates : CustomStringConvertible {
         return false
     }
     
-    public func risingTransitAndSetting(at date: Date, and location: GeographicLocation, degreesBelowTheHorizon h0: Double = SphericalCoordinates.meanAtmosphericRefraction) throws -> (rising: Date?, transit: Date, setting: Date?, antiTransit: Date) {
+    /**
+     * Calculates the rising, transit, and setting times for the current coordinates at the specified location
+     * and date.
+     *
+     * The values are returned in a tuple containing the forllowing keyword with associated values.
+     * * `rising` The time of rising of the coordinates at the specified location and date.
+     * * `transit` The time of transit of the coordinates at the specified location and date.
+     * * `setting` The time of setting of the coordinates at the specified location and date.
+     * * `antitransit` The time opposite to the transit time, i.e. when the coordinates are at its lowest
+     * position. If the location is on the northern hemisphere, this will be the time when the coordinates are
+     * due north, below the horizon, or above the horizon if the coordinates are circumpolar.
+     *
+     * - Parameter date: The date for which the rising, transit, and setting times are to be
+     * calculated.
+     * - Parameter location: The geographical location for which the rising, transit, and setting times
+     * are to be calculated.
+     * - Parameter h0: The height below the horizon for which the rising and
+     * setting times are calculated. Default is equal to the mean atmospheric refraction of 0°34".
+     * - Returns: The  rising, transit, and setting times of the coordinates.
+     */
+    public func risingTransitAndSetting(at date: Date, and location: GeographicLocation, angleBelowTheHorizon h0: Double = SphericalCoordinates.meanAtmosphericRefraction) throws -> (rising: Date?, transit: Date, setting: Date?, antiTransit: Date) {
         var rising: Date? = nil
         var transit: Date? = nil
         var setting: Date? = nil
         var antiTransit: Date? = nil
         let coordinates = try self.transform(to: CoordinateFrame.equatorial(on: date))
-        let cosH0 = (sin(h0) - sin(location.latitude) * sin(coordinates.latitude)) / (cos(location.latitude)*cos(coordinates.latitude))
+        let cosH0 = (sin(-h0) - sin(location.latitude) * sin(coordinates.latitude)) / (cos(location.latitude)*cos(coordinates.latitude))
         let Θ0 = date.meanSiderealTimeAtGreenwichAtMidnight
         var m0 = (coordinates.longitude - location.longitude - Θ0) / (2*Double.pi)
         let jd0UT = Double(Int(date.julianDay - 0.5)) + 0.5
         if fabs(cosH0) <= 1.0 {
-            let H0 = cos(cosH0)
+            let H0 = acos(cosH0)
             var m1 = m0 - H0 / (2*Double.pi)
             var m2 = m0 + H0 / (2*Double.pi)
             if m1 < 0.0 {
