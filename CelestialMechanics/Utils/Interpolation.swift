@@ -8,7 +8,7 @@
 import Foundation
 
 
-enum InterpolationException : Error {
+public enum InterpolationException : Error {
     case epochOutOfEphemerisRange
 }
 

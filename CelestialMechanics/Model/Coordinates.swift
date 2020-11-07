@@ -397,60 +397,56 @@ public struct SphericalCoordinates : CustomStringConvertible {
      * Calculates the rising, transit, and setting times for the current coordinates at the specified location
      * and date.
      *
-     * The values are returned in a tuple containing the forllowing keyword with associated values.
-     * * `rising` The time of rising of the coordinates at the specified location and date.
-     * * `transit` The time of transit of the coordinates at the specified location and date.
-     * * `setting` The time of setting of the coordinates at the specified location and date.
-     * * `antitransit` The time opposite to the transit time, i.e. when the coordinates are at its lowest
-     * position. If the location is on the northern hemisphere, this will be the time when the coordinates are
-     * due north, below the horizon, or above the horizon if the coordinates are circumpolar.
-     *
      * - Parameter date: The date for which the rising, transit, and setting times are to be
      * calculated.
      * - Parameter location: The geographical location for which the rising, transit, and setting times
      * are to be calculated.
      * - Parameter h0: The height below the horizon for which the rising and
      * setting times are calculated. Default is equal to the mean atmospheric refraction of 0°34".
-     * - Returns: The  rising, transit, and setting times of the coordinates.
+     * - Returns: The  rising, transit, and events times of the coordinates.
      */
-    public func risingTransitAndSetting(at date: Date, and location: GeographicLocation, angleBelowTheHorizon h0: Double = SphericalCoordinates.meanAtmosphericRefraction) throws -> (rising: Date?, transit: Date, setting: Date?, antiTransit: Date) {
-        var rising: Date? = nil
-        var transit: Date? = nil
-        var setting: Date? = nil
-        var antiTransit: Date? = nil
+    public func risingTransitAndSetting(at date: Date, and location: GeographicLocation, angleBelowTheHorizon h0: Double = SphericalCoordinates.meanAtmosphericRefraction) throws -> [AstronomicalEvent] {
+        let jd0 = try self.risingTransitSettingValues(at: date, and: location, angleBelowTheHorizon: h0)
+        let date1 = Date(julianDay: date.julianDay + 1.0)
+        let jd1 = try self.risingTransitSettingValues(at: date1, and: location, angleBelowTheHorizon: h0)
+        var events = [AstronomicalEvent]()
+        events.append(AstronomicalEvent(type: .lowerCulmination, date: Date(julianDay:  jd0.jdLowerCulmination1), objects: nil, coordinates: self, validForOrigin: .topocentric(location: location)))
+        if jd0.jdRising != nil {
+            events.append(AstronomicalEvent(type: .rising, date: Date(julianDay:  jd0.jdRising!), objects: nil, coordinates: self, validForOrigin: .topocentric(location: location)))
+        }
+        events.append(AstronomicalEvent(type: .upperCulmination, date: Date(julianDay:  jd0.jdTransit), objects: nil, coordinates: self, validForOrigin: .topocentric(location: location)))
+        if jd0.jdSetting != nil {
+            events.append(AstronomicalEvent(type: .setting, date: Date(julianDay:  jd0.jdSetting!), objects: nil, coordinates: self, validForOrigin: .topocentric(location: location)))
+        }
+        events.append(AstronomicalEvent(type: .lowerCulmination, date: Date(julianDay:  jd0.jdLowerCulmination2), objects: nil, coordinates: self, validForOrigin: .topocentric(location: location)))
+        events.append(AstronomicalEvent(type: .lowerCulmination, date: Date(julianDay:  jd1.jdLowerCulmination1), objects: nil, coordinates: self, validForOrigin: .topocentric(location: location)))
+        if jd1.jdRising != nil {
+            events.append(AstronomicalEvent(type: .rising, date: Date(julianDay:  jd1.jdRising!), objects: nil, coordinates: self, validForOrigin: .topocentric(location: location)))
+        }
+        events.append(AstronomicalEvent(type: .upperCulmination, date: Date(julianDay:  jd1.jdTransit), objects: nil, coordinates: self, validForOrigin: .topocentric(location: location)))
+        if jd1.jdSetting != nil {
+            events.append(AstronomicalEvent(type: .setting, date: Date(julianDay:  jd1.jdSetting!), objects: nil, coordinates: self, validForOrigin: .topocentric(location: location)))
+        }
+        events.append(AstronomicalEvent(type: .lowerCulmination, date: Date(julianDay:  jd1.jdLowerCulmination2), objects: nil, coordinates: self, validForOrigin: .topocentric(location: location)))
+        return events
+    }
+    
+    private func risingTransitSettingValues(at date: Date, and location: GeographicLocation, angleBelowTheHorizon h0: Double = SphericalCoordinates.meanAtmosphericRefraction) throws -> (jdLowerCulmination1: Double, jdRising: Double?, jdTransit: Double, jdSetting: Double?, jdLowerCulmination2: Double) {
         let coordinates = try self.transform(to: CoordinateFrame.equatorial(on: date))
         let cosH0 = (sin(-h0) - sin(location.latitude) * sin(coordinates.latitude)) / (cos(location.latitude)*cos(coordinates.latitude))
         let Θ0 = date.meanSiderealTimeAtGreenwichAtMidnight
-        var m0 = (coordinates.longitude - location.longitude - Θ0) / (2*Double.pi)
-        let jd0UT = Double(Int(date.julianDay - 0.5)) + 0.5
+        let jd0UT = Double(Int(date.julianDay - 0.5)) + 0.5*Date.lengthOfSiderealDay/Date.lengthOfDay
+        var m1 : Double? = nil
+        var m2 : Double? = nil
+        let m0 = (coordinates.longitude - location.longitude - Θ0) / (2*Double.pi)
         if fabs(cosH0) <= 1.0 {
             let H0 = acos(cosH0)
-            var m1 = m0 - H0 / (2*Double.pi)
-            var m2 = m0 + H0 / (2*Double.pi)
-            if m1 < 0.0 {
-                m1 = m1 + 1.0
-            }
-            if m2 < 0.0 {
-                m2 = m2 + 1.0
-            }
-            let jd1 = jd0UT + m1
-            let jd2 = jd0UT + m2
-            rising = Date(julianDay: jd1)
-            setting = Date(julianDay: jd2)
+            m1 = m0 - H0 / (2*Double.pi)
+            m2 = m0 + H0 / (2*Double.pi)
         }
-        if m0 < 0.0 {
-            m0 = m0 + 1.0
-        }
-        let jd0 = jd0UT + m0
-        transit = Date(julianDay: jd0)
-        // 0.4986347859 is half a sidereal day in solar days
-        var ma = m0 + 0.4986347859
-        if m0 > 0.5 {
-            ma = m0 - 0.4986347859
-        }
-        let jda = jd0UT + ma
-        antiTransit = Date(julianDay: jda)
-        return (rising: rising, transit: transit!, setting: setting, antiTransit: antiTransit!)
+        let jdRising = m1 != nil ? jd0UT + m1! : nil
+        let jdSetting = m2 != nil ? jd0UT + m2! : nil
+        return (jdLowerCulmination1: jd0UT + m0 - 0.5, jdRising: jdRising, jdTransit: jd0UT + m0, jdSetting: jdSetting, jdLowerCulmination2: jd0UT + m0 + 0.5)
     }
     
     public var description: String {

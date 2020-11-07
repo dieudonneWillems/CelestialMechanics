@@ -11,6 +11,7 @@
 		C779687A254B7835003179E2 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7796879254B7835003179E2 /* Types.swift */; };
 		C7796880254C2188003179E2 /* SolarSystemTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C779687F254C2188003179E2 /* SolarSystemTestCase.swift */; };
 		C7796886254E2FBF003179E2 /* DateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7796885254E2FBF003179E2 /* DateTests.swift */; };
+		C7C6AB822556B55C00755535 /* Events.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7C6AB812556B55B00755535 /* Events.swift */; };
 		C7D702CB2546CDD00090DB36 /* CelestialMechanics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7D702C12546CDD00090DB36 /* CelestialMechanics.framework */; };
 		C7D702D02546CDD00090DB36 /* CoordinatesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D702CF2546CDD00090DB36 /* CoordinatesTests.swift */; };
 		C7D702D22546CDD00090DB36 /* CelestialMechanics.h in Headers */ = {isa = PBXBuildFile; fileRef = C7D702C42546CDD00090DB36 /* CelestialMechanics.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -51,6 +52,7 @@
 		C7796879254B7835003179E2 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
 		C779687F254C2188003179E2 /* SolarSystemTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolarSystemTestCase.swift; sourceTree = "<group>"; };
 		C7796885254E2FBF003179E2 /* DateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateTests.swift; sourceTree = "<group>"; };
+		C7C6AB812556B55B00755535 /* Events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Events.swift; sourceTree = "<group>"; };
 		C7D702C12546CDD00090DB36 /* CelestialMechanics.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CelestialMechanics.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C7D702C42546CDD00090DB36 /* CelestialMechanics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CelestialMechanics.h; sourceTree = "<group>"; };
 		C7D702C52546CDD00090DB36 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -178,6 +180,7 @@
 				C7D70324254710C80090DB36 /* Date+CMextensions.swift */,
 				C7D70328254716720090DB36 /* Ephemerides.swift */,
 				C7796879254B7835003179E2 /* Types.swift */,
+				C7C6AB812556B55B00755535 /* Events.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -319,6 +322,7 @@
 				C7D70329254716720090DB36 /* Ephemerides.swift in Sources */,
 				C7D7031B2546CF550090DB36 /* Coordinates.swift in Sources */,
 				C779687A254B7835003179E2 /* Types.swift in Sources */,
+				C7C6AB822556B55C00755535 /* Events.swift in Sources */,
 				C7D7031F2546DAFD0090DB36 /* Interpolation.swift in Sources */,
 				C7D70325254710C80090DB36 /* Date+CMextensions.swift in Sources */,
 			);
@@ -479,6 +483,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = CelestialMechanics/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -505,6 +510,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = CelestialMechanics/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

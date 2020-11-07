@@ -7,17 +7,39 @@
 
 import Foundation
 
-public protocol CelestialObject {
+
+public enum CelestialObjectException : Error {
+    case undefinedPropertyException
+}
+
+
+public class CelestialObject : Equatable {
     
-    var identifiers: [String] { get }
+    public let identifiers: [String]
     
-    func sphericalCoordinates(at epoch: Date, inCoordinateFrame frame: CoordinateFrame) throws -> SphericalCoordinates
-    func rectangularCoordinates(at epoch: Date, inCoordinateFrame frame: CoordinateFrame) throws -> RectangularCoordinates
-    func visualMagnitude(at epoch: Date) throws -> Magnitude
+    public init(_ identifier: String) {
+        self.identifiers = [identifier]
+    }
+    
+    public init(identifiers: [String]) {
+        self.identifiers = identifiers
+    }
+    
+    func sphericalCoordinates(at epoch: Date, inCoordinateFrame frame: CoordinateFrame) throws -> SphericalCoordinates {
+        throw CelestialObjectException.undefinedPropertyException
+    }
+    
+    func rectangularCoordinates(at epoch: Date, inCoordinateFrame frame: CoordinateFrame) throws -> RectangularCoordinates {
+        throw CelestialObjectException.undefinedPropertyException
+    }
+    
+    func visualMagnitude(at epoch: Date) throws -> Magnitude {
+        throw CelestialObjectException.undefinedPropertyException
+    }
     
     /**
      * Calculates the rising, transit, and setting times for the celestial body at the specified location
-     * and date.
+     * and date.It reutrns an array of ´AstronomicalEvent`s.
      *
      * The values are returned in a tuple containing the forllowing keyword with associated values.
      * * `rising` The time of rising of the celestial body at the specified location and date.
@@ -33,17 +55,27 @@ public protocol CelestialObject {
      * are to be calculated.
      * - Parameter h0: The height below the horizon for which the rising and
      * setting times are calculated. Default is equal to the mean atmospheric refraction of 0°34".
-     * - Returns: The  rising, transit, and setting times of the coordinates.
+     * - Returns: The  rising, transit, and setting events for the object.
      */
-    func risingTransitAndSetting(at date: Date, and location: GeographicLocation, angleBelowTheHorizon h0: Double) throws -> (rising: Date?, transit: Date, setting: Date?, antiTransit: Date)
+    func risingTransitAndSetting(at date: Date, and location: GeographicLocation, angleBelowTheHorizon h0: Double) throws -> [AstronomicalEvent] {
+        throw CelestialObjectException.undefinedPropertyException
+    }
+    
+    public static func == (lhs: CelestialObject, rhs: CelestialObject) -> Bool {
+        for id in lhs.identifiers {
+            if rhs.identifiers.contains(id) {
+                return true
+            }
+        }
+        return false
+    }
   
 }
-
-public protocol DeepSkyObject: CelestialObject {
+public protocol DeepSkyObject {
     
 }
 
-public protocol PointSource: CelestialObject {
+public protocol PointSource {
     
 }
 
@@ -63,21 +95,17 @@ public protocol ExtendedDeepSkyObject: DeepSkyObject {
     
 }
 
-public protocol SolarSystemObject: CelestialObject {
+public protocol SolarSystemObject {
     
 }
 
-public class EphemeridesObject: SolarSystemObject {
-    
-    public var identifiers: [String]
+public class EphemeridesObject: CelestialObject, SolarSystemObject {
     
     public let name: String
     private var ephemerides: InterpolationTimeSeries?
     
     init(name: String) {
         self.name = name
-        self.identifiers = [String]()
-        self.identifiers.append(name)
         if name == "Sun" {
            self.ephemerides = Ephemerides.EPHEM_SUN
         } else if name == "Mercury" {
@@ -99,14 +127,15 @@ public class EphemeridesObject: SolarSystemObject {
         } else if name == "Moon" {
             self.ephemerides = Ephemerides.EPHEM_MOON
         }
+        super.init(name)
     }
     
-    public func sphericalCoordinates(at epoch: Date, inCoordinateFrame frame: CoordinateFrame) throws -> SphericalCoordinates {
+    public override func sphericalCoordinates(at epoch: Date, inCoordinateFrame frame: CoordinateFrame) throws -> SphericalCoordinates {
         let rectCoord = try self.rectangularCoordinates(at: epoch, inCoordinateFrame: frame)
         return rectCoord.sphericalCoordinates
     }
     
-    public func rectangularCoordinates(at epoch: Date, inCoordinateFrame frame: CoordinateFrame) throws -> RectangularCoordinates {
+    public override func rectangularCoordinates(at epoch: Date, inCoordinateFrame frame: CoordinateFrame) throws -> RectangularCoordinates {
         if name == "Earth" {
             let rectValuesICRS = RectangularCoordinates(x: 0.0, y: 0.0, z: 0.00000000001, frame: .ICRS)
             return try rectValuesICRS.transform(to: frame)
@@ -116,7 +145,7 @@ public class EphemeridesObject: SolarSystemObject {
         return try rectValuesICRS.transform(to: frame)
     }
     
-    public func visualMagnitude(at epoch: Date) -> Magnitude {
+    public override func visualMagnitude(at epoch: Date) -> Magnitude {
         return Magnitude(value: 1.0)
     }
     
@@ -124,87 +153,51 @@ public class EphemeridesObject: SolarSystemObject {
      * Calculates the rising, transit, and setting times for the celestial body at the specified location
      * and date.
      *
-     * The values are returned in a tuple containing the forllowing keyword with associated values.
-     * * `rising` The time of rising of the celestial body at the specified location and date.
-     * * `transit` The time of transit of the celestial body at the specified location and date.
-     * * `setting` The time of setting of the celestial body at the specified location and date.
-     * * `antitransit` The time opposite to the transit time, i.e. when the celestial body is at its lowest
-     * position. If the location is on the northern hemisphere, this will be the time when the celestial body is
-     * due north, below the horizon, or above the horizon if the celestial body is circumpolar.
-     *
      * - Parameter date: The date for which the rising, transit, and setting times are to be
      * calculated.
      * - Parameter location: The geographical location for which the rising, transit, and setting times
      * are to be calculated.
      * - Parameter h0: The height below the horizon for which the rising and
      * setting times are calculated. Default is equal to the mean atmospheric refraction of 0°34".
-     * - Returns: The  rising, transit, and setting times of the coordinates.
+     * - Returns: The  rising, transit, and setting times of the celestial object.
      */
-    public func risingTransitAndSetting(at date: Date, and location: GeographicLocation, angleBelowTheHorizon h0: Double = SphericalCoordinates.meanAtmosphericRefraction) throws -> (rising: Date?, transit: Date, setting: Date?, antiTransit: Date) {
+    public override func risingTransitAndSetting(at date: Date, and location: GeographicLocation, angleBelowTheHorizon h: Double = 0.0) throws -> [AstronomicalEvent] {
         let pos = try self.rectangularCoordinates(at: date, inCoordinateFrame: .ICRS)
-        let h0 = standardAltitude(distance: pos.distance)
-        let rts = try pos.sphericalCoordinates.risingTransitAndSetting(at: date, and: location, angleBelowTheHorizon: h0)
-        let rising = try self.iterateOnRising(rising: rts.rising, at: location, angleBelowTheHorizon: h0)
-        let transit = try self.iterateOnTransit(transit: rts.transit, at: location, angleBelowTheHorizon: h0)
-        let setting = try self.iterateOnSetting(setting: rts.setting, at: location, angleBelowTheHorizon: h0)
-        let antiTransit = try self.iterateOnAntiTransit(antiTransit: rts.antiTransit, at: location, angleBelowTheHorizon: h0)
-        return (rising: rising, transit: transit, setting: setting, antiTransit: antiTransit)
+        var h0 = h
+        if h <= 0.0 {
+            h0 = standardAltitude(distance: pos.distance)
+        }
+        let events = try pos.sphericalCoordinates.risingTransitAndSetting(at: date, and: location, angleBelowTheHorizon: h0)
+        var recalculatedEvents = [AstronomicalEvent]()
+        for event in events {
+            let recalculatedEvent = try iterateOn(event: event, at: date, and: location, angleBelowTheHorizon: h0)
+            recalculatedEvents.append(recalculatedEvent)
+        }
+        return recalculatedEvents
     }
     
-    private func iterateOnRising(rising: Date?, at location: GeographicLocation, angleBelowTheHorizon h0: Double) throws -> Date? {
-        if rising == nil {
-            return nil
+    private func iterateOn(event: AstronomicalEvent, at date: Date, and location: GeographicLocation, angleBelowTheHorizon h0: Double) throws -> AstronomicalEvent {
+        print("Event: \(event)  date: \(event.date.julianDay)")
+        var recEvents = [AstronomicalEvent]()
+        let recEventsPrelim = try self.rectangularCoordinates(at: event.date, inCoordinateFrame: .ICRS).sphericalCoordinates.risingTransitAndSetting(at: date, and: location, angleBelowTheHorizon: h0)
+        for prelimEvent in recEventsPrelim { // Add the object to the event (otherwise only associated with coordinates).
+            let recEvent = AstronomicalEvent(type: prelimEvent.type, date: prelimEvent.date, objects: [self], coordinates: prelimEvent.coordinates, validForOrigin: prelimEvent.validForOrigin)
+            recEvents.append(recEvent)
         }
-        print("rising: \(rising!)")
-        let rts = try self.sphericalCoordinates(at: rising!, inCoordinateFrame: .ICRS).risingTransitAndSetting(at: rising!, and: location, angleBelowTheHorizon: h0)
-        if rts.rising == nil {
-            return nil
+        let typeEvents = AstronomicalEvent.filter(events: recEvents, type: [event.type])
+        var recalculatedEvent : AstronomicalEvent? = nil
+        var minDT = 86400.00
+        for typeEvent in typeEvents {
+            let dt = fabs(event.date.timeIntervalSince(typeEvent.date))
+            if dt < minDT {
+                minDT = dt
+                recalculatedEvent = typeEvent
+            }
         }
-        let dt = fabs(rising!.timeIntervalSince(rts.rising!))
-        print("dt = \(dt)")
-        if dt > 1.0 {
-            return try self.iterateOnRising(rising: rts.rising!, at: location, angleBelowTheHorizon: h0)
+        if minDT > 1.0 {
+            recalculatedEvent = try iterateOn(event: recalculatedEvent!, at: date, and: location, angleBelowTheHorizon: h0)
         }
-        return rts.rising!
-    }
-    
-    private func iterateOnTransit(transit: Date, at location: GeographicLocation, angleBelowTheHorizon h0: Double) throws -> Date {
-        print("transit: \(transit)")
-        let rts = try self.sphericalCoordinates(at: transit, inCoordinateFrame: .ICRS).risingTransitAndSetting(at: transit, and: location, angleBelowTheHorizon: h0)
-        let dt = fabs(transit.timeIntervalSince(rts.transit))
-        print("dt = \(dt)")
-        if dt > 1.0 {
-            return try self.iterateOnTransit(transit: rts.transit, at: location, angleBelowTheHorizon: h0)
-        }
-        return rts.transit
-    }
-    
-    private func iterateOnSetting(setting: Date?, at location: GeographicLocation, angleBelowTheHorizon h0: Double) throws -> Date? {
-        if setting == nil {
-            return nil
-        }
-        print("setting: \(setting!)")
-        let rts = try self.sphericalCoordinates(at: setting!, inCoordinateFrame: .ICRS).risingTransitAndSetting(at: setting!, and: location, angleBelowTheHorizon: h0)
-        if rts.setting == nil {
-            return nil
-        }
-        let dt = fabs(setting!.timeIntervalSince(rts.setting!))
-        print("dt = \(dt)")
-        if dt > 1.0 {
-            return try self.iterateOnSetting(setting: rts.setting!, at: location, angleBelowTheHorizon: h0)
-        }
-        return rts.setting!
-    }
-    
-    private func iterateOnAntiTransit(antiTransit: Date, at location: GeographicLocation, angleBelowTheHorizon h0: Double) throws -> Date {
-        print("antiTransit: \(antiTransit)")
-        let rts = try self.sphericalCoordinates(at: antiTransit, inCoordinateFrame: .ICRS).risingTransitAndSetting(at: antiTransit, and: location, angleBelowTheHorizon: h0)
-        let dt = fabs(antiTransit.timeIntervalSince(rts.antiTransit))
-        print("dt = \(dt)")
-        if dt > 1.0 {
-            return try self.iterateOnAntiTransit(antiTransit: rts.antiTransit, at: location, angleBelowTheHorizon: h0)
-        }
-        return rts.antiTransit
+        return recalculatedEvent!
     }
     
     /**
@@ -223,6 +216,59 @@ public class EphemeridesObject: SolarSystemObject {
 public class Sun: EphemeridesObject, Star {
     
     public static let sun = Sun(name: "Sun")
+    
+    /**
+     * Calculates the rising, transit, and setting times for the Sun at the specified location
+     * and date.
+     *
+     * - Parameter date: The date for which the rising, transit, and setting times are to be
+     * calculated.
+     * - Parameter location: The geographical location for which the rising, transit, and setting times
+     * are to be calculated.
+     * - Parameter h0: The height below the horizon for which the rising and
+     * setting times are calculated. Default is equal to the mean atmospheric refraction of 0°34".
+     * - Returns: The  rising, transit, and setting events of the Sun.
+     */
+    public override func risingTransitAndSetting(at date: Date, and location: GeographicLocation, angleBelowTheHorizon h: Double = 0.0) throws -> [AstronomicalEvent] {
+        var events = [AstronomicalEvent]()
+        let rtsEvents = try super.risingTransitAndSetting(at: date, and: location)
+        events.append(contentsOf: rtsEvents)
+        var civilEvents = try super.risingTransitAndSetting(at: date, and: location, angleBelowTheHorizon: AstronomicalEvent.civilTwilightTresshold)
+        civilEvents = AstronomicalEvent.filter(events: civilEvents, type: [.rising, .setting])
+        var correctedCivilEvents = [AstronomicalEvent]()
+        for event in civilEvents {
+            var type = AstronomicalEvent.AstronomicalEventType.civilDawn
+            if event.type == .setting {
+                type = .civilDusk
+            }
+            correctedCivilEvents.append(AstronomicalEvent(type: type, date: event.date, objects: event.objects, coordinates: event.coordinates, validForOrigin: event.validForOrigin))
+        }
+        events.append(contentsOf: correctedCivilEvents)
+        var nauticalEvents = try super.risingTransitAndSetting(at: date, and: location, angleBelowTheHorizon: AstronomicalEvent.nauticalTwilightTresshold)
+        nauticalEvents = AstronomicalEvent.filter(events: nauticalEvents, type: [.rising, .setting])
+        var correctedNauticalEvents = [AstronomicalEvent]()
+        for event in nauticalEvents {
+            var type = AstronomicalEvent.AstronomicalEventType.nauticalDawn
+            if event.type == .setting {
+                type = .nauticalDusk
+            }
+            correctedNauticalEvents.append(AstronomicalEvent(type: type, date: event.date, objects: event.objects, coordinates: event.coordinates, validForOrigin: event.validForOrigin))
+        }
+        events.append(contentsOf: correctedNauticalEvents)
+        var astronomicalEvents = try super.risingTransitAndSetting(at: date, and: location, angleBelowTheHorizon: AstronomicalEvent.astronomicalTwilightTresshold)
+        astronomicalEvents = AstronomicalEvent.filter(events: astronomicalEvents, type: [.rising, .setting])
+        var correctedAstronomicalEvents = [AstronomicalEvent]()
+        for event in astronomicalEvents {
+            var type = AstronomicalEvent.AstronomicalEventType.astronomicalDawn
+            if event.type == .setting {
+                type = .astronomicalDusk
+            }
+            correctedAstronomicalEvents.append(AstronomicalEvent(type: type, date: event.date, objects: event.objects, coordinates: event.coordinates, validForOrigin: event.validForOrigin))
+        }
+        events.append(contentsOf: correctedAstronomicalEvents)
+        events = AstronomicalEvent.removeDuplicates(events: events)
+        return events
+    }
     
     /**
      * The standard altitude, i.e. the angle that a body needs to be below the horizon when it starts to rise.

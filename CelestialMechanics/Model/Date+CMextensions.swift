@@ -35,8 +35,15 @@ public extension Date {
      */
     static let J2050 = Date(julianDay: 2469807.5)
     
-    /* The number of seconds in a day.*/
-    private static let lengthOfDay : TimeInterval = 86400.0
+    /**
+     * The number of seconds in a day.
+     */
+    static let lengthOfDay : TimeInterval = 86400.0
+    
+    /**
+     * The number of seconds in a sidereal day.
+     */
+    static let lengthOfSiderealDay: TimeInterval = 0.9972695671 * lengthOfDay
     
     /**
      * The number of seconds in a Julian year (equal to `365.25` days).
