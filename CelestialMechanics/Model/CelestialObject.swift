@@ -159,7 +159,7 @@ public class EphemeridesObject: CelestialObject, SolarSystemObject {
      * are to be calculated.
      * - Parameter h0: The height below the horizon for which the rising and
      * setting times are calculated. Default is equal to the mean atmospheric refraction of 0°34".
-     * - Returns: The  rising, transit, and setting times of the celestial object.
+     * - Returns: The  rising, transit, and setting times of the celestial object in a list of `AstronomicalEvent`s..
      */
     public override func risingTransitAndSetting(at date: Date, and location: GeographicLocation, angleBelowTheHorizon h: Double = 0.0) throws -> [AstronomicalEvent] {
         let pos = try self.rectangularCoordinates(at: date, inCoordinateFrame: .ICRS)
@@ -173,18 +173,18 @@ public class EphemeridesObject: CelestialObject, SolarSystemObject {
             let recalculatedEvent = try iterateOn(event: event, at: date, and: location, angleBelowTheHorizon: h0)
             recalculatedEvents.append(recalculatedEvent)
         }
+        recalculatedEvents = AstronomicalEvent.removeDuplicates(events: recalculatedEvents)
         return recalculatedEvents
     }
     
     private func iterateOn(event: AstronomicalEvent, at date: Date, and location: GeographicLocation, angleBelowTheHorizon h0: Double) throws -> AstronomicalEvent {
-        print("Event: \(event)  date: \(event.date.julianDay)")
         var recEvents = [AstronomicalEvent]()
         let recEventsPrelim = try self.rectangularCoordinates(at: event.date, inCoordinateFrame: .ICRS).sphericalCoordinates.risingTransitAndSetting(at: date, and: location, angleBelowTheHorizon: h0)
         for prelimEvent in recEventsPrelim { // Add the object to the event (otherwise only associated with coordinates).
             let recEvent = AstronomicalEvent(type: prelimEvent.type, date: prelimEvent.date, objects: [self], coordinates: prelimEvent.coordinates, validForOrigin: prelimEvent.validForOrigin)
             recEvents.append(recEvent)
         }
-        let typeEvents = AstronomicalEvent.filter(events: recEvents, type: [event.type])
+        let typeEvents = AstronomicalEvent.filter(events: recEvents, include: [event.type])
         var recalculatedEvent : AstronomicalEvent? = nil
         var minDT = 86400.00
         for typeEvent in typeEvents {
@@ -234,7 +234,7 @@ public class Sun: EphemeridesObject, Star {
         let rtsEvents = try super.risingTransitAndSetting(at: date, and: location)
         events.append(contentsOf: rtsEvents)
         var civilEvents = try super.risingTransitAndSetting(at: date, and: location, angleBelowTheHorizon: AstronomicalEvent.civilTwilightTresshold)
-        civilEvents = AstronomicalEvent.filter(events: civilEvents, type: [.rising, .setting])
+        civilEvents = AstronomicalEvent.filter(events: civilEvents, include: [.rising, .setting])
         var correctedCivilEvents = [AstronomicalEvent]()
         for event in civilEvents {
             var type = AstronomicalEvent.AstronomicalEventType.civilDawn
@@ -245,7 +245,7 @@ public class Sun: EphemeridesObject, Star {
         }
         events.append(contentsOf: correctedCivilEvents)
         var nauticalEvents = try super.risingTransitAndSetting(at: date, and: location, angleBelowTheHorizon: AstronomicalEvent.nauticalTwilightTresshold)
-        nauticalEvents = AstronomicalEvent.filter(events: nauticalEvents, type: [.rising, .setting])
+        nauticalEvents = AstronomicalEvent.filter(events: nauticalEvents, include: [.rising, .setting])
         var correctedNauticalEvents = [AstronomicalEvent]()
         for event in nauticalEvents {
             var type = AstronomicalEvent.AstronomicalEventType.nauticalDawn
@@ -256,7 +256,7 @@ public class Sun: EphemeridesObject, Star {
         }
         events.append(contentsOf: correctedNauticalEvents)
         var astronomicalEvents = try super.risingTransitAndSetting(at: date, and: location, angleBelowTheHorizon: AstronomicalEvent.astronomicalTwilightTresshold)
-        astronomicalEvents = AstronomicalEvent.filter(events: astronomicalEvents, type: [.rising, .setting])
+        astronomicalEvents = AstronomicalEvent.filter(events: astronomicalEvents, include: [.rising, .setting])
         var correctedAstronomicalEvents = [AstronomicalEvent]()
         for event in astronomicalEvents {
             var type = AstronomicalEvent.AstronomicalEventType.astronomicalDawn
@@ -317,6 +317,23 @@ public class Moon: EphemeridesObject, Satellite {
     }
     
     /**
+     * Calculates the rising, transit, and setting times for the Moon at the specified location
+     * and date.
+     *
+     * - Parameter date: The date for which the rising, transit, and setting times are to be
+     * calculated.
+     * - Parameter location: The geographical location for which the rising, transit, and setting times
+     * are to be calculated.
+     * - Parameter h0: This parameter is ignored as the value is automatically calculated.
+     * - Returns: The  rising, transit, and setting times of the Moon in a list of `AstronomicalEvent`s..
+     */
+    public override func risingTransitAndSetting(at date: Date, and location: GeographicLocation, angleBelowTheHorizon h: Double = 0.0) throws -> [AstronomicalEvent] {
+        var events = try super.risingTransitAndSetting(at: date, and: location)
+        events = AstronomicalEvent.filter(events: events, exclude: [.lowerCulmination])
+        return events
+    }
+    
+    /**
      * The standard altitude, i.e. the angle that the Moon needs to be below the horizon when it starts to rise.
      * This value depends on atmospheric refraction and also on the apparent size of the Moon.
      *
@@ -339,6 +356,23 @@ public class Planet: EphemeridesObject {
     public static let saturn = Planet(name: "Saturn")
     public static let uranus = Planet(name: "Uranus")
     public static let neptune = Planet(name: "Neptune")
+    
+    /**
+     * Calculates the rising, transit, and setting times for the planet at the specified location
+     * and date.
+     *
+     * - Parameter date: The date for which the rising, transit, and setting times are to be
+     * calculated.
+     * - Parameter location: The geographical location for which the rising, transit, and setting times
+     * are to be calculated.
+     * - Parameter h0: This parameter is ignored as the value is automatically calculated.
+     * - Returns: The  rising, transit, and setting times of the planet in a list of `AstronomicalEvent`s..
+     */
+    public override func risingTransitAndSetting(at date: Date, and location: GeographicLocation, angleBelowTheHorizon h: Double = 0.0) throws -> [AstronomicalEvent] {
+        var events = try super.risingTransitAndSetting(at: date, and: location)
+        events = AstronomicalEvent.filter(events: events, exclude: [.lowerCulmination])
+        return events
+    }
 }
 
 public protocol DwarfPlanet: Planet {

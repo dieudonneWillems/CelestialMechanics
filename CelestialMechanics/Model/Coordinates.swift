@@ -435,7 +435,7 @@ public struct SphericalCoordinates : CustomStringConvertible {
         let coordinates = try self.transform(to: CoordinateFrame.equatorial(on: date))
         let cosH0 = (sin(-h0) - sin(location.latitude) * sin(coordinates.latitude)) / (cos(location.latitude)*cos(coordinates.latitude))
         let Θ0 = date.meanSiderealTimeAtGreenwichAtMidnight
-        let jd0UT = Double(Int(date.julianDay - 0.5)) + 0.5*Date.lengthOfSiderealDay/Date.lengthOfDay
+        let jd0UT = Double(Int(date.julianDay - 0.5)) + 0.5
         var m1 : Double? = nil
         var m2 : Double? = nil
         let m0 = (coordinates.longitude - location.longitude - Θ0) / (2*Double.pi)
@@ -446,7 +446,8 @@ public struct SphericalCoordinates : CustomStringConvertible {
         }
         let jdRising = m1 != nil ? jd0UT + m1! : nil
         let jdSetting = m2 != nil ? jd0UT + m2! : nil
-        return (jdLowerCulmination1: jd0UT + m0 - 0.5, jdRising: jdRising, jdTransit: jd0UT + m0, jdSetting: jdSetting, jdLowerCulmination2: jd0UT + m0 + 0.5)
+        let halfSiderealDay = 0.5*Date.siderealDay/Date.lengthOfDay
+        return (jdLowerCulmination1: jd0UT + m0 - halfSiderealDay, jdRising: jdRising, jdTransit: jd0UT + m0, jdSetting: jdSetting, jdLowerCulmination2: jd0UT + m0 + halfSiderealDay)
     }
     
     public var description: String {

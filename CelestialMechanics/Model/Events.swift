@@ -47,17 +47,27 @@ public struct AstronomicalEvent : CustomStringConvertible, Equatable {
     public let coordinates: SphericalCoordinates
     public let validForOrigin: CoordinateFrameOrigin
     
-    public static func filter(events: [AstronomicalEvent], type: [AstronomicalEventType]) -> [AstronomicalEvent] {
+    public static func filter(events: [AstronomicalEvent], include types: [AstronomicalEventType]) -> [AstronomicalEvent] {
         var newList = [AstronomicalEvent]()
         for event in events {
-            if type.contains(event.type) {
+            if types.contains(event.type) {
                 newList.append(event)
             }
         }
         return newList
     }
     
-    public static func filter(events: [AstronomicalEvent], objects: [CelestialObject]) -> [AstronomicalEvent] {
+    public static func filter(events: [AstronomicalEvent], exclude types: [AstronomicalEventType]) -> [AstronomicalEvent] {
+        var newList = [AstronomicalEvent]()
+        for event in events {
+            if !types.contains(event.type) {
+                newList.append(event)
+            }
+        }
+        return newList
+    }
+    
+    public static func filter(events: [AstronomicalEvent], include objects: [CelestialObject]) -> [AstronomicalEvent] {
         var newList = [AstronomicalEvent]()
         for event in events {
             if event.objects != nil {
@@ -71,10 +81,26 @@ public struct AstronomicalEvent : CustomStringConvertible, Equatable {
         return newList
     }
     
+    public static func filter(events: [AstronomicalEvent], start startDate: Date, end endDate: Date) -> [AstronomicalEvent] {
+        var newList = [AstronomicalEvent]()
+        for event in events {
+            if event.date >= startDate && event.date <= endDate {
+                newList.append(event)
+            }
+        }
+        return newList
+    }
+    
     public static func removeDuplicates(events: [AstronomicalEvent]) -> [AstronomicalEvent] {
         var withoutDuplicates = [AstronomicalEvent]()
         for event in events {
-            if !withoutDuplicates.contains(event) {
+            var found = false
+            for withoutEvent in withoutDuplicates {
+                if withoutEvent == event {
+                    found = true
+                }
+            }
+            if !found {
                 withoutDuplicates.append(event)
             }
         }

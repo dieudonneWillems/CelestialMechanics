@@ -43,7 +43,7 @@ public extension Date {
     /**
      * The number of seconds in a sidereal day.
      */
-    static let lengthOfSiderealDay: TimeInterval = 0.9972695671 * lengthOfDay
+    static let siderealDay: TimeInterval = 0.9972695671 * lengthOfDay
     
     /**
      * The number of seconds in a Julian year (equal to `365.25` days).
