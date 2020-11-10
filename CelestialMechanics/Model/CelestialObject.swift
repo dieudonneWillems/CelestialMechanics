@@ -10,6 +10,7 @@ import Foundation
 
 public enum CelestialObjectException : Error {
     case undefinedPropertyException
+    case angleWithSelfException
 }
 
 
@@ -25,16 +26,41 @@ public class CelestialObject : Equatable {
         self.identifiers = identifiers
     }
     
-    func sphericalCoordinates(at epoch: Date, inCoordinateFrame frame: CoordinateFrame) throws -> SphericalCoordinates {
+    public func sphericalCoordinates(at epoch: Date, inCoordinateFrame frame: CoordinateFrame) throws -> SphericalCoordinates {
         throw CelestialObjectException.undefinedPropertyException
     }
     
-    func rectangularCoordinates(at epoch: Date, inCoordinateFrame frame: CoordinateFrame) throws -> RectangularCoordinates {
+    public func rectangularCoordinates(at epoch: Date, inCoordinateFrame frame: CoordinateFrame) throws -> RectangularCoordinates {
         throw CelestialObjectException.undefinedPropertyException
     }
     
-    func visualMagnitude(at epoch: Date) throws -> Magnitude {
+    public func visualMagnitude(at epoch: Date) throws -> Magnitude {
         throw CelestialObjectException.undefinedPropertyException
+    }
+    
+    /**
+     * The phase angle of the object, which is the angle Sun-object-Earth.
+     *
+     * - Parameter epoch: The epoch (date and time) for which the phase angle should be
+     * calculated.
+     * - Returns: The phase angle.
+     */
+    public func phaseAngle(at epoch: Date) throws -> Double {
+        if self == Sun.sun || self == Planet.earth {
+            throw CelestialObjectException.angleWithSelfException
+        }
+        let rectCoord = try self.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
+        let sunCoord = try self.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
+        let Δ = rectCoord.distance
+        let R = sunCoord.distance
+        if Δ == nil || R == nil {
+            // Distance is unknown and therefore assumed to be very
+            // large. The phase angle should therefore be 0.0.
+            return 0.0
+        }
+        let r = sqrt(pow(rectCoord.x-sunCoord.x , 2) + pow(rectCoord.y-sunCoord.y , 2) + pow(rectCoord.z-sunCoord.z , 2))
+        let i = acos((pow(r, 2) + pow(Δ!, 2) - pow(R!, 2)) / (2 * r * Δ!))
+        return i
     }
     
     /**
@@ -145,8 +171,23 @@ public class EphemeridesObject: CelestialObject, SolarSystemObject {
         return try rectValuesICRS.transform(to: frame)
     }
     
-    public override func visualMagnitude(at epoch: Date) -> Magnitude {
-        return Magnitude(value: 1.0)
+    /**
+     * The illuminated fraction of the disk (in case of a spherical object) as seen from Earth.
+     *
+     * * A value of `0.0` denotes a disk that is not illuminated by the Sun. This happens when the object
+     * is between the Earth and the Sun (in the case of the Moon, we call this *New Moon*).
+     * * A value of `1.0` denotes a fully illuminated disk. This happens when the Earth is between the
+     * object and the Sun (in the case of the Moon this is *Full Moon*) or when the Sun is between the
+     * object and the Earth.
+     *
+     * - Parameter epoch: The epoch (date and time) for which the illuminated fraction should be
+     * calculated.
+     * - Returns: The illuminated fraction of the object's disk.
+     */
+    public func illuminatedFraction(at epoch: Date) throws -> Double {
+        let i = try self.phaseAngle(at: epoch)
+        let k = (1 + cos(i)) / 2
+        return k
     }
     
     /**
@@ -356,6 +397,10 @@ public class Planet: EphemeridesObject {
     public static let saturn = Planet(name: "Saturn")
     public static let uranus = Planet(name: "Uranus")
     public static let neptune = Planet(name: "Neptune")
+    
+    public override func visualMagnitude(at epoch: Date) throws -> Magnitude {
+        throw CelestialObjectException.undefinedPropertyException
+    }
     
     /**
      * Calculates the rising, transit, and setting times for the planet at the specified location
