@@ -218,6 +218,7 @@ public struct CoordinateFrame : Equatable {
     public static let B1950 = CoordinateFrame(type: .FK4, equinox: Date.B1950)
     public static let J2000 = CoordinateFrame(type: .FK5, equinox: Date.J2000)
     public static let J2050 = CoordinateFrame(type: .FK5, equinox: Date.J2050)
+    public static let heliocentricICRS = CoordinateFrame(type: .ICRF, origin: .heliocentric, equinox: nil)
     
     public static func equatorial(on epoch: Date) -> CoordinateFrame {
         return CoordinateFrame(type: .FK5, equinox: epoch)
@@ -632,10 +633,10 @@ public struct RectangularCoordinates {
         
         // Transformation to correct origin. If the distance is not known, the
         // distance is assumed to be so large that the translation is negligable.
-        if coordinates.frame.origin != frame.origin && !coordinates.distanceIsKnown {
+        if coordinates.frame.origin != frame.origin && coordinates.distanceIsKnown {
             // Transformation from original origin to geocentric
             if coordinates.frame.origin == .heliocentric {
-                let sunCoord = try Sun.sun.rectangularCoordinates(at: epoch, inCoordinateFrame: frame)
+                let sunCoord = try Sun.sun.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
                 newCoordinates.x = sunCoord.x - newCoordinates.x
                 newCoordinates.y = sunCoord.y - newCoordinates.y
                 newCoordinates.z = sunCoord.z - newCoordinates.z
@@ -643,7 +644,7 @@ public struct RectangularCoordinates {
             // TODO: Transformation from topoccentric coordinates
             // Transformation from geocentric to target origin.
             if frame.origin == .heliocentric {
-                let sunCoord = try Sun.sun.rectangularCoordinates(at: epoch, inCoordinateFrame: frame)
+                let sunCoord = try Sun.sun.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
                 newCoordinates.x = newCoordinates.x - sunCoord.x
                 newCoordinates.y = newCoordinates.y - sunCoord.y
                 newCoordinates.z = newCoordinates.z - sunCoord.z
