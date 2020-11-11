@@ -416,7 +416,7 @@ public class Planet: EphemeridesObject {
     public static let earth = Planet(name: "Earth")
     public static let mars = Planet(name: "Mars")
     public static let jupiter = Planet(name: "Jupiter")
-    public static let saturn = Planet(name: "Saturn")
+    public static let saturn = Saturn(name: "Saturn")
     public static let uranus = Planet(name: "Uranus")
     public static let neptune = Planet(name: "Neptune")
     
@@ -464,7 +464,7 @@ public class Planet: EphemeridesObject {
         throw CelestialObjectException.undefinedPropertyException
     }
     
-    private override init(name: String) {
+    fileprivate override init(name: String) {
         super.init(name: name)
     }
     
@@ -483,6 +483,21 @@ public class Planet: EphemeridesObject {
         var events = try super.risingTransitAndSetting(at: date, and: location)
         events = AstronomicalEvent.filter(events: events, exclude: [.lowerCulmination])
         return events
+    }
+}
+
+public class Saturn: Planet {
+    
+    public func inclinationOfTheRing(at epoch: Date) -> Double {
+        let T = epoch.julianCentury
+        let i = 28.075216 - 0.012998*T + 0.000004*pow(T, 2)
+        return i * Units.degree
+    }
+    
+    public func longitudeOfTheAscendingNode(at epoch: Date) -> Double {
+        let T = epoch.julianCentury
+        let Ω = 169.508470 + 1.394681*T + 0.000412*pow(T, 2)
+        return Ω * Units.degree
     }
 }
 
