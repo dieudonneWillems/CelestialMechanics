@@ -632,9 +632,6 @@ public struct RectangularCoordinates {
         return RectangularCoordinates(x: newCoordinates.x, y: newCoordinates.y, z: newCoordinates.z, frame: frame)
     }
     
-    fileprivate static let AU : Double = 149597870700.0
-    fileprivate static let pc : Double = 30856775814913673.0
-    
     fileprivate static func distanceDescription(distance: Double) -> String {
         if distance < 1000 {
             return "\(distance) m"
@@ -642,15 +639,15 @@ public struct RectangularCoordinates {
         if distance < 1000000 {
             return "\(distance/1000.0) km"
         }
-        if distance < RectangularCoordinates.pc/1000 {
-            return "\(distance/RectangularCoordinates.AU) AU"
+        if distance < Units.pc/1000 {
+            return "\(distance/Units.AU) AU"
         }
-        if distance < RectangularCoordinates.pc*900 {
-            return "\(distance/RectangularCoordinates.pc) pc"
+        if distance < Units.pc*900 {
+            return "\(distance/Units.pc) pc"
         }
-        if distance < RectangularCoordinates.pc*900000 {
-            return "\(distance/RectangularCoordinates.pc/1000.0) kpc"
+        if distance < Units.pc*900000 {
+            return "\(distance/Units.pc/1000.0) kpc"
         }
-        return "\(distance/RectangularCoordinates.pc/1000000.0) Mpc"
+        return "\(distance/Units.pc/1000000.0) Mpc"
     }
 }

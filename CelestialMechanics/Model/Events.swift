@@ -14,10 +14,10 @@ public struct AstronomicalEvent : CustomStringConvertible, Equatable {
     public static let nauticalTwilightTresshold = 12.0/Double.rpi
     public static let astronomicalTwilightTresshold = 18.0/Double.rpi
     
-    public enum AstronomicalEventType : String{
+    public enum AstronomicalEventType : String {
         case rising
         case upperCulmination = "upper culmination"
-        case setting
+        case setting 
         case lowerCulmination = "lower culmination"
         case astronomicalDawn = "astronomical dawn"
         case nauticalDawn = "nautical dawn"

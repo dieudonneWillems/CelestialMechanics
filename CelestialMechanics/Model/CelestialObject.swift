@@ -11,6 +11,7 @@ import Foundation
 public enum CelestialObjectException : Error {
     case undefinedPropertyException
     case angleWithSelfException
+    case unspecifiedDistanceException
 }
 
 
@@ -50,7 +51,7 @@ public class CelestialObject : Equatable {
             throw CelestialObjectException.angleWithSelfException
         }
         let rectCoord = try self.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
-        let sunCoord = try self.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
+        let sunCoord = try Sun.sun.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
         let Δ = rectCoord.distance
         let R = sunCoord.distance
         if Δ == nil || R == nil {
@@ -61,6 +62,27 @@ public class CelestialObject : Equatable {
         let r = sqrt(pow(rectCoord.x-sunCoord.x , 2) + pow(rectCoord.y-sunCoord.y , 2) + pow(rectCoord.z-sunCoord.z , 2))
         let i = acos((pow(r, 2) + pow(Δ!, 2) - pow(R!, 2)) / (2 * r * Δ!))
         return i
+    }
+    
+    /**
+     * Returns the distance of the celestial object to the Sun in meters.
+     *
+     * - Parameter epoch: The epoch (date and time) for which the distance should be
+     * calculated.
+     * - Returns: The distance to the Sun in meters.
+     * - Throws `CelestialObjectException.unspecifiedDistanceException`: when
+     * the distance to the Earth was not specified or is unknown (e.g. for distant stars).
+     */
+    func distanceToTheSun(at epoch: Date) throws -> Double {
+        let rectCoord = try self.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
+        let sunCoord = try Sun.sun.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
+        let Δ = rectCoord.distance
+        let R = sunCoord.distance
+        if Δ == nil || R == nil {
+            throw CelestialObjectException.unspecifiedDistanceException
+        }
+        let r = sqrt(pow(rectCoord.x-sunCoord.x , 2) + pow(rectCoord.y-sunCoord.y , 2) + pow(rectCoord.z-sunCoord.z , 2))
+        return r
     }
     
     /**
@@ -399,7 +421,51 @@ public class Planet: EphemeridesObject {
     public static let neptune = Planet(name: "Neptune")
     
     public override func visualMagnitude(at epoch: Date) throws -> Magnitude {
+        let rectCoord = try self.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
+        let sunCoord = try Sun.sun.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
+        var Δ = rectCoord.distance
+        if Δ == nil {
+            throw CelestialObjectException.unspecifiedDistanceException
+        }
+        var r = sqrt(pow(rectCoord.x-sunCoord.x , 2) + pow(rectCoord.y-sunCoord.y , 2) + pow(rectCoord.z-sunCoord.z , 2))
+        var i = try self.phaseAngle(at: epoch)
+        Δ = Δ! / Units.AU // Distance should be expressed in AU for these formulae.
+        r = r / Units.AU
+        i = i / Units.degree  // The phase angle should be expressed in degrees
+        if self.name == "Mercury" {
+            let mv = -0.42 + 5 * log10(r*Δ!) + 0.0380*i - 0.000273*pow(i, 2) + 0.000002*pow(i, 3)
+            return Magnitude(value: mv)
+        }
+        if self.name == "Venus" {
+            let mv = -4.40 + 5 * log10(r*Δ!) + 0.0009*i + 0.000239*pow(i, 2) - 0.00000065*pow(i, 3)
+            return Magnitude(value: mv)
+        }
+        if self.name == "Mars" {
+            let mv = -1.52 + 5 * log10(r*Δ!) + 0.016*i
+            return Magnitude(value: mv)
+        }
+        if self.name == "Jupiter" {
+            let mv = -9.40 + 5 * log10(r*Δ!) + 0.005*i
+            return Magnitude(value: mv)
+        }
+        // TODO: Calculate magnitude in specific Saturn class
+        if self.name == "Uranus" {
+            let mv = -7.19 + 5 * log10(r*Δ!)
+            return Magnitude(value: mv)
+        }
+        if self.name == "Neptune" {
+            let mv = -6.87 + 5 * log10(r*Δ!)
+            return Magnitude(value: mv)
+        }
+        if self.name == "Pluto" {
+            let mv = -1.00 + 5 * log10(r*Δ!)
+            return Magnitude(value: mv)
+        }
         throw CelestialObjectException.undefinedPropertyException
+    }
+    
+    private override init(name: String) {
+        super.init(name: name)
     }
     
     /**
