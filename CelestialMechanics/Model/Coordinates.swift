@@ -629,6 +629,26 @@ public struct RectangularCoordinates {
             let rotationFactors = try RectangularCoordinates.rotationFactors(for: frame, at: frame.equinox)
             newCoordinates = RectangularCoordinates.rotateFromGalactic(coordinates: newCoordinates, rotationFactors: rotationFactors)
         }
+        
+        // Transformation to correct origin.
+        if coordinates.frame.origin != frame.origin {
+            // Transformation from original origin to geocentric
+            if coordinates.frame.origin == .heliocentric {
+                let sunCoord = try Sun.sun.rectangularCoordinates(at: epoch, inCoordinateFrame: frame)
+                newCoordinates.x = sunCoord.x - newCoordinates.x
+                newCoordinates.y = sunCoord.y - newCoordinates.y
+                newCoordinates.z = sunCoord.z - newCoordinates.z
+            }
+            // TODO: Transformation from topoccentric coordinates
+            // Transformation from geocentric to target origin.
+            if frame.origin == .heliocentric {
+                let sunCoord = try Sun.sun.rectangularCoordinates(at: epoch, inCoordinateFrame: frame)
+                newCoordinates.x = newCoordinates.x - sunCoord.x
+                newCoordinates.y = newCoordinates.y - sunCoord.y
+                newCoordinates.z = newCoordinates.z - sunCoord.z
+            }
+            // TODO: Transformation to topoccentric coordinates
+        }
         return RectangularCoordinates(x: newCoordinates.x, y: newCoordinates.y, z: newCoordinates.z, frame: frame)
     }
     
