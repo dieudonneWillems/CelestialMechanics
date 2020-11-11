@@ -28,34 +28,58 @@ class CoordinatesTests: XCTestCase {
 
     func testEphemerides() throws {
         let coord = SphericalCoordinates(longitude: 0.0, latitude: 0.0, frame: .ICRS)
-        let ncoord = try coord.transform(to: .J2000)
+        let epoch = Date()
+        let ncoord = try coord.transform(to: .J2000, at: epoch)
         XCTAssertNotNil(ncoord.frame.equinox)
         XCTAssertEqual(ncoord.frame.equinox, Date.J2000)
         XCTAssertNotEqual(ncoord.frame.equinox, Date.J2050)
-        XCTAssertTrue(try coord.angularSeparation(with: ncoord)*180/Double.pi < 0.000001)
+        XCTAssertTrue(try coord.angularSeparation(with: ncoord, at: epoch)*180/Double.pi < 0.000001)
         print(coord)
         print(ncoord)
     }
     
     func testReciprocity() throws {
         let coord = SphericalCoordinates(longitude: 0.0, latitude: 1.0, frame: .ICRS)
-        let ncoord = try coord.transform(to: .galactic)
-        let ncoord2 = try ncoord.transform(to: .ICRS)
+        let epoch = Date()
+        let ncoord = try coord.transform(to: .galactic, at: epoch)
+        let ncoord2 = try ncoord.transform(to: .ICRS, at: epoch)
         print(coord)
         print(ncoord)
         print(ncoord2)
         XCTAssertNil(ncoord.frame.equinox)
         XCTAssertNil(ncoord2.frame.equinox)
-        XCTAssertTrue(try coord.angularSeparation(with: ncoord2)*180/Double.pi < 0.000001)
+        XCTAssertTrue(try coord.angularSeparation(with: ncoord2, at: epoch)*180/Double.pi < 0.000001)
     }
     
     func testPositionAngle() throws {
         let coord = SphericalCoordinates(longitude: 0.0, latitude: 0.0, frame: .ICRS)
         let coord2 = SphericalCoordinates(longitude: 1.9*Double.pi, latitude: 0.0, frame: .ICRS)
-        XCTAssertEqual(try coord.positionAngle(withRespectTo: coord2), 0.5*Double.pi)
-        XCTAssertNotEqual(try coord.positionAngle(withRespectTo: coord2), 1.5*Double.pi)
-        XCTAssertEqual(try coord2.positionAngle(withRespectTo: coord), 1.5*Double.pi)
-        XCTAssertNotEqual(try coord2.positionAngle(withRespectTo: coord), 0.5*Double.pi)
+        let epoch = Date()
+        XCTAssertEqual(try coord.positionAngle(withRespectTo: coord2, at: epoch), 0.5*Double.pi)
+        XCTAssertNotEqual(try coord.positionAngle(withRespectTo: coord2, at: epoch), 1.5*Double.pi)
+        XCTAssertEqual(try coord2.positionAngle(withRespectTo: coord, at: epoch), 1.5*Double.pi)
+        XCTAssertNotEqual(try coord2.positionAngle(withRespectTo: coord, at: epoch), 0.5*Double.pi)
+    }
+    
+    func testOriginTranslation() throws {
+        let vernalEquinox = Date(julianDay: 2459293.90069) // vernal equinox 2021, March 20th 09:37 UTC
+        let coord1 = SphericalCoordinates(longitude: 0.0, latitude: 0.0, frame: .ICRS)
+        let heliocentric = CoordinateFrame.heliocentricICRS
+        let coord2 = try coord1.transform(to: heliocentric, at: vernalEquinox)
+        XCTAssertTrue(fabs(coord1.longitude-coord2.longitude)/Double.rpi < 0.01)
+        XCTAssertTrue(fabs(coord1.latitude-coord2.latitude)/Double.rpi < 0.01)
+        XCTAssertNil(coord2.distance)
+    }
+    
+    func testOriginTranslation2() throws {
+        let vernalEquinox = Date(julianDay: 2459293.90069) // vernal equinox 2021, March 20th 09:37 UTC
+        let coord1 = SphericalCoordinates(longitude: 0.0, latitude: 0.0, distance: 0.5 * 1.496e11, frame: .ICRS) // distance 0.5 AU
+        let heliocentric = CoordinateFrame.heliocentricICRS
+        let coord2 = try coord1.transform(to: heliocentric, at: vernalEquinox)
+        XCTAssertTrue(fabs(Double.pi-coord2.longitude)/Double.rpi < 0.01)
+        XCTAssertTrue(fabs(coord1.latitude-coord2.latitude)/Double.rpi < 0.01)
+        XCTAssertNotNil(coord2.distance)
+        XCTAssertTrue(fabs(coord1.distance!-coord2.distance!)/Double.rpi < 0.1*1.496e11)
     }
 
     func testPerformanceExample() throws {
