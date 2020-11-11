@@ -630,8 +630,9 @@ public struct RectangularCoordinates {
             newCoordinates = RectangularCoordinates.rotateFromGalactic(coordinates: newCoordinates, rotationFactors: rotationFactors)
         }
         
-        // Transformation to correct origin.
-        if coordinates.frame.origin != frame.origin {
+        // Transformation to correct origin. If the distance is not known, the
+        // distance is assumed to be so large that the translation is negligable.
+        if coordinates.frame.origin != frame.origin && !coordinates.distanceIsKnown {
             // Transformation from original origin to geocentric
             if coordinates.frame.origin == .heliocentric {
                 let sunCoord = try Sun.sun.rectangularCoordinates(at: epoch, inCoordinateFrame: frame)
