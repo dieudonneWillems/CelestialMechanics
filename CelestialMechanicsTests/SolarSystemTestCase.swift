@@ -49,14 +49,40 @@ class SolarSystemTestCase: XCTestCase {
             XCTAssertTrue(true)
         }
     }
+    
+    func testMagnitudeJupiter() throws {
+        let jupiter = Planet.jupiter
+        let epoch = Date(julianDay: 2459175.50000) // 22 nov 2020 0h UTC
+        XCTAssertTrue(fabs(try jupiter.visualMagnitude(at: epoch).value - -2.1) < 0.1)
+    }
+    
+    func testMagnitudeAndIlluminatedFractionVenus() throws {
+        let venus = Planet.venus
+        let epoch = Date(julianDay: 2459175.50000) // 22 nov 2020 0h UTC
+        XCTAssertTrue(fabs(try venus.visualMagnitude(at: epoch).value - -4.0) < 0.1)
+        XCTAssertTrue(fabs(try venus.illuminatedFraction(at: epoch) - 0.867) < 0.001)
+    }
 
-    func testPerformanceExample() throws {
+    func testPerformanceMoonCoordinates() throws {
         // This is an example of a performance test case.
         self.measure {
             let moon = Moon.moon
             let epoch = Date(julianEpoch: 2020.9)
             do {
                 let _ = try moon.sphericalCoordinates(at: epoch, inCoordinateFrame: .J2000)
+            } catch {
+                XCTAssertTrue(true)
+            }
+        }
+    }
+    
+    func testPerformanceVenusMagnitude() throws {
+        // This is an example of a performance test case.
+        self.measure {
+            let venus = Planet.venus
+            let epoch = Date(julianDay: 2459175.50000) // 22 nov 2020 0h UTC
+            do {
+                let _ = try venus.visualMagnitude(at: epoch)
             } catch {
                 XCTAssertTrue(true)
             }
