@@ -164,11 +164,11 @@ public class EphemeridesObject: CelestialObject, SolarSystemObject {
     public override func rectangularCoordinates(at epoch: Date, inCoordinateFrame frame: CoordinateFrame) throws -> RectangularCoordinates {
         if name == "Earth" {
             let rectValuesICRS = RectangularCoordinates(x: 0.0, y: 0.0, z: 0.00000000001, frame: .ICRS)
-            return try rectValuesICRS.transform(to: frame)
+            return try rectValuesICRS.transform(to: frame, at: epoch)
         }
         let values = try ephemerides!.interpolatedValues(time: epoch)
         let rectValuesICRS = RectangularCoordinates(x: values[0], y: values[1], z: values[2], frame: .ICRS)
-        return try rectValuesICRS.transform(to: frame)
+        return try rectValuesICRS.transform(to: frame, at: epoch)
     }
     
     /**
