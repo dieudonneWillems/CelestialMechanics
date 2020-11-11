@@ -486,14 +486,33 @@ public class Planet: EphemeridesObject {
     }
 }
 
+/**
+ * An instance of this class represents the planet Saturn. Apart from generic parameters such as the position
+ * and magnitude, this class also inculdes functions to calculate the positions of the
+ * rings of Saturn.
+ */
 public class Saturn: Planet {
     
+    /**
+     * Calculates the inclination of the plane of the rings of Saturn referred to the mean ecliptic and equinox
+     * of the specified epoch.
+     *
+     * - Parameter epoch: The date for which the inclination should be calculated.
+     * - Returns: The inclination of the rings of Saturn in radians.
+     */
     public func inclinationOfTheRing(at epoch: Date) -> Double {
         let T = epoch.julianCentury
         let i = 28.075216 - 0.012998*T + 0.000004*pow(T, 2)
         return i * Units.degree
     }
     
+    /**
+     * Calculates the longitude of the ascending node of Saturn  referred to the mean ecliptic and equinox
+     * of the specified epoch.
+     *
+     * - Parameter epoch: The date for which the longitude should be calculated.
+     * - Returns: The longitude of the ascending node.
+     */
     public func longitudeOfTheAscendingNode(at epoch: Date) -> Double {
         let T = epoch.julianCentury
         let Ω = 169.508470 + 1.394681*T + 0.000412*pow(T, 2)
