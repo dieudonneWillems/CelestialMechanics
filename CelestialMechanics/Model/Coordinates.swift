@@ -224,6 +224,14 @@ public struct CoordinateFrame : Equatable {
         return CoordinateFrame(type: .FK5, equinox: epoch)
     }
     
+    public static func meanEcliptical(origin: CoordinateFrameOrigin = .geocentric, on epoch: Date) -> CoordinateFrame {
+        return CoordinateFrame(type: .meanEcliptical, origin: origin, equinox: epoch)
+    }
+    
+    public static func trueEcliptical(origin: CoordinateFrameOrigin = .geocentric, on epoch: Date) -> CoordinateFrame {
+        return CoordinateFrame(type: .trueEcliptical, origin: origin, equinox: epoch)
+    }
+    
     /*
     case galactic
     case fk4(equinox: Date)
