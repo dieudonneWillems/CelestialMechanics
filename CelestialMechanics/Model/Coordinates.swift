@@ -218,6 +218,7 @@ public struct CoordinateFrame : Equatable {
     public static let B1950 = CoordinateFrame(type: .FK4, equinox: Date.B1950)
     public static let J2000 = CoordinateFrame(type: .FK5, equinox: Date.J2000)
     public static let J2050 = CoordinateFrame(type: .FK5, equinox: Date.J2050)
+    public static let heliocentricICRS = CoordinateFrame(type: .ICRF, origin: .heliocentric, equinox: nil)
     
     public static func equatorial(on epoch: Date) -> CoordinateFrame {
         return CoordinateFrame(type: .FK5, equinox: epoch)
@@ -298,9 +299,9 @@ public struct SphericalCoordinates : CustomStringConvertible {
         self.frame = frame
     }
     
-    public func transform(to frame: CoordinateFrame) throws -> SphericalCoordinates {
+    public func transform(to frame: CoordinateFrame, at epoch: Date) throws -> SphericalCoordinates {
         let rectCoord = self.rectangularCoordinates
-        let transformedRectCoord = try rectCoord.transform(to: frame)
+        let transformedRectCoord = try rectCoord.transform(to: frame, at: epoch)
         let transformedCoord = transformedRectCoord.sphericalCoordinates
         return transformedCoord
     }
@@ -316,8 +317,8 @@ public struct SphericalCoordinates : CustomStringConvertible {
         }
     }
     
-    public func angularSeparation(with coordinates: SphericalCoordinates) throws -> Double {
-        let transformedCoordinates = try coordinates.transform(to: self.frame)
+    public func angularSeparation(with coordinates: SphericalCoordinates, at epoch: Date) throws -> Double {
+        let transformedCoordinates = try coordinates.transform(to: self.frame, at: epoch)
         let x = cos(self.latitude)*sin(transformedCoordinates.latitude) - sin(self.latitude)*cos(transformedCoordinates.latitude) * cos(transformedCoordinates.longitude - self.longitude)
         let y = cos(transformedCoordinates.latitude) * sin(transformedCoordinates.longitude - self.longitude)
         let z = sin(self.latitude)*sin(transformedCoordinates.latitude) + cos(self.latitude)*cos(transformedCoordinates.latitude) * cos(transformedCoordinates.longitude - self.longitude)
@@ -332,12 +333,14 @@ public struct SphericalCoordinates : CustomStringConvertible {
      *
      * - Parameter coordinates: The coordinates, where the position angle is calculates in respect
      * of.
+     * - Parameter epoch: The epoch for which the position angle should be calculated. Thiis will not
+     * take the movement of objects into account, it is only used when coordinates do not use the same origin.
      * - Returns: The position angle in radians.
      * - Throws `epochOutOfEphemerisRange`: When the coordinates could not be transformed to
      * the correct coordinate frame because the equinox was out of the range of the ephemeris.
      */
-    public func positionAngle(withRespectTo coordinates: SphericalCoordinates) throws -> Double {
-        let transformedCoordinates = try coordinates.transform(to: self.frame)
+    public func positionAngle(withRespectTo coordinates: SphericalCoordinates, at epoch: Date) throws -> Double {
+        let transformedCoordinates = try coordinates.transform(to: self.frame, at: epoch)
         let Δlon = self.longitude - transformedCoordinates.longitude
         var P = atan2(sin(Δlon), cos(transformedCoordinates.latitude)*tan(self.latitude) - sin(transformedCoordinates.latitude)*cos(Δlon))
         if P < 0.0 {
@@ -432,7 +435,7 @@ public struct SphericalCoordinates : CustomStringConvertible {
     }
     
     private func risingTransitSettingValues(at date: Date, and location: GeographicLocation, angleBelowTheHorizon h0: Double = SphericalCoordinates.meanAtmosphericRefraction) throws -> (jdLowerCulmination1: Double, jdRising: Double?, jdTransit: Double, jdSetting: Double?, jdLowerCulmination2: Double) {
-        let coordinates = try self.transform(to: CoordinateFrame.equatorial(on: date))
+        let coordinates = try self.transform(to: CoordinateFrame.equatorial(on: date), at: date)
         let cosH0 = (sin(-h0) - sin(location.latitude) * sin(coordinates.latitude)) / (cos(location.latitude)*cos(coordinates.latitude))
         let Θ0 = date.meanSiderealTimeAtGreenwichAtMidnight
         let jd0UT = Double(Int(date.julianDay - 0.5)) + 0.5
@@ -463,7 +466,7 @@ public struct SphericalCoordinates : CustomStringConvertible {
                 string = "A = \(self.longitude*180/Double.pi)°  h = \(self.latitude*180/Double.pi)°"
             }
             if distance != nil {
-                string = "\(string)  d = \(self.distance!)m"
+                string = "\(string)  d = \(RectangularCoordinates.distanceDescription(distance: self.distance!))"
             }
             if frame.equinox != nil {
                 if frame.equinox == Date.J2000 {
@@ -513,8 +516,8 @@ public struct RectangularCoordinates {
     
     public let frame: CoordinateFrame
     
-    public func transform(to frame: CoordinateFrame) throws -> RectangularCoordinates {
-        return try RectangularCoordinates.transformCoordinates(coordinates: self, to: frame)
+    public func transform(to frame: CoordinateFrame, at epoch: Date) throws -> RectangularCoordinates {
+        return try RectangularCoordinates.transformCoordinates(coordinates: self, to: frame, at: epoch)
     }
     
     public var sphericalCoordinates : SphericalCoordinates {
@@ -535,7 +538,7 @@ public struct RectangularCoordinates {
             var string = "(x=\(x), y=\(y), z=\(z))"
             let distance = self.distance
             if distance != nil {
-                string = "(x=\(x)m, y=\(y)m, z=\(z)m)  d = \(distance!)m"
+                string = "(x=\(RectangularCoordinates.distanceDescription(distance: x)), y=\(RectangularCoordinates.distanceDescription(distance: y)), z=\(RectangularCoordinates.distanceDescription(distance: z)))  d = \(RectangularCoordinates.distanceDescription(distance: distance!))"
             }
             if frame.equinox != nil {
                 if frame.equinox == Date.J2000 {
@@ -610,9 +613,7 @@ public struct RectangularCoordinates {
         return [(cosRotation: values[0], sinRotation: values[1]), (cosRotation: values[2], sinRotation: values[3]), (cosRotation: values[4], sinRotation: values[5])]
     }
 
-    private static func transformCoordinates(coordinates: RectangularCoordinates, to frame: CoordinateFrame) throws -> RectangularCoordinates {
-        // TODO: Transformation to correct origin.
-        
+    private static func transformCoordinates(coordinates: RectangularCoordinates, to frame: CoordinateFrame, at epoch: Date) throws -> RectangularCoordinates {
         if coordinates.frame == .ICRS && frame == .ICRS {
             return coordinates
         }
@@ -629,6 +630,49 @@ public struct RectangularCoordinates {
             let rotationFactors = try RectangularCoordinates.rotationFactors(for: frame, at: frame.equinox)
             newCoordinates = RectangularCoordinates.rotateFromGalactic(coordinates: newCoordinates, rotationFactors: rotationFactors)
         }
+        
+        // Transformation to correct origin. If the distance is not known, the
+        // distance is assumed to be so large that the translation is negligable.
+        if coordinates.frame.origin != frame.origin && coordinates.distanceIsKnown {
+            // Transformation from original origin to geocentric
+            if coordinates.frame.origin == .heliocentric {
+                let sunCoord = try Sun.sun.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
+                newCoordinates.x = sunCoord.x - newCoordinates.x
+                newCoordinates.y = sunCoord.y - newCoordinates.y
+                newCoordinates.z = sunCoord.z - newCoordinates.z
+            }
+            // TODO: Transformation from topoccentric coordinates
+            // Transformation from geocentric to target origin.
+            if frame.origin == .heliocentric {
+                let sunCoord = try Sun.sun.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
+                newCoordinates.x = newCoordinates.x - sunCoord.x
+                newCoordinates.y = newCoordinates.y - sunCoord.y
+                newCoordinates.z = newCoordinates.z - sunCoord.z
+            }
+            // TODO: Transformation to topoccentric coordinates
+        }
         return RectangularCoordinates(x: newCoordinates.x, y: newCoordinates.y, z: newCoordinates.z, frame: frame)
+    }
+    
+    fileprivate static let AU : Double = 149597870700.0
+    fileprivate static let pc : Double = 30856775814913673.0
+    
+    fileprivate static func distanceDescription(distance: Double) -> String {
+        if distance < 1000 {
+            return "\(distance) m"
+        }
+        if distance < 1000000 {
+            return "\(distance/1000.0) km"
+        }
+        if distance < RectangularCoordinates.pc/1000 {
+            return "\(distance/RectangularCoordinates.AU) AU"
+        }
+        if distance < RectangularCoordinates.pc*900 {
+            return "\(distance/RectangularCoordinates.pc) pc"
+        }
+        if distance < RectangularCoordinates.pc*900000 {
+            return "\(distance/RectangularCoordinates.pc/1000.0) kpc"
+        }
+        return "\(distance/RectangularCoordinates.pc/1000000.0) Mpc"
     }
 }
