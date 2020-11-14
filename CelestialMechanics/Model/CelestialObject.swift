@@ -456,6 +456,18 @@ public class Planet: EphemeridesObject {
     public static let uranus = Planet(name: "Uranus")
     public static let neptune = Planet(name: "Neptune")
     
+    
+    /**
+     * The visual magnitude of the planet as observed from Earth.
+     *
+     * The magnitude is calculated using the formuae from the *Astronomical Almanac* as used in
+     * Chapter 41 in Meeus, 1998, page 286.
+     *
+     * Reference: Meeus, Jean, 1998, *Astronomical Algorithms*, Willmann-Bell Inc., second edition.
+     *
+     * - Parameter epoch: The date for which the visual magnitude should be calculated.
+     * - Returns: The visual magnitude.
+     */
     public override func visualMagnitude(at epoch: Date) throws -> Magnitude {
         let rectCoord = try self.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
         let sunCoord = try Sun.sun.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
@@ -599,6 +611,19 @@ public class Saturn: Planet {
         public let ΔU: Double
     }
     
+    /**
+     * The visual magnitude of Saturn as observed from Earth.
+     *
+     * For Saturn the aspect of the ring system has been taken into account.
+     *
+     * The magnitude is calculated using the formula from the *Astronomical Almanac* as used in
+     * Chapter 41 in Meeus, 1998, page 286.
+     *
+     * Reference: Meeus, Jean, 1998, *Astronomical Algorithms*, Willmann-Bell Inc., second edition.
+     *
+     * - Parameter epoch: The date for which the visual magnitude should be calculated.
+     * - Returns: The visual magnitude.
+     */
     public override func visualMagnitude(at epoch: Date) throws -> Magnitude {
         let rectCoord = try self.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
         let sunCoord = try Sun.sun.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
