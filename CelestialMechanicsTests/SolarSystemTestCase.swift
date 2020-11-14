@@ -86,6 +86,22 @@ class SolarSystemTestCase: XCTestCase {
         XCTAssertTrue(fabs(ring.P/Units.degree - 6.741) < 0.05, "P = \(ring.P/Units.degree)°")
         XCTAssertTrue(fabs(ring.ΔU/Units.degree - 4.198) < 0.002, "ΔU = \(ring.ΔU/Units.degree)°")
     }
+    
+    func testMagnitudeSaturn() throws {
+        let calendar = Calendar.current
+        var dateComponents = DateComponents()
+        dateComponents.year = 1992
+        dateComponents.month = 12
+        dateComponents.day = 16
+        dateComponents.timeZone = TimeZone(abbreviation: "GMT")
+        dateComponents.hour = 0
+        dateComponents.minute = 0
+        dateComponents.second = 0
+        let epoch = calendar.date(from: dateComponents)!
+        let saturn = Planet.saturn
+        let mv = try saturn.visualMagnitude(at: epoch).value
+        XCTAssertTrue(fabs(mv - 0.7) < 0.1, "m = \(mv)")
+    }
 
     func testPerformanceMoonCoordinates() throws {
         // This is an example of a performance test case.
