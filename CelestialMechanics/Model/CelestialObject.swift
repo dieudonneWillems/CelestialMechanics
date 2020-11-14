@@ -11,6 +11,7 @@ import Foundation
 public enum CelestialObjectException : Error {
     case undefinedPropertyException
     case angleWithSelfException
+    case unspecifiedDistanceException
 }
 
 
@@ -50,7 +51,7 @@ public class CelestialObject : Equatable {
             throw CelestialObjectException.angleWithSelfException
         }
         let rectCoord = try self.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
-        let sunCoord = try self.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
+        let sunCoord = try Sun.sun.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
         let Δ = rectCoord.distance
         let R = sunCoord.distance
         if Δ == nil || R == nil {
@@ -61,6 +62,27 @@ public class CelestialObject : Equatable {
         let r = sqrt(pow(rectCoord.x-sunCoord.x , 2) + pow(rectCoord.y-sunCoord.y , 2) + pow(rectCoord.z-sunCoord.z , 2))
         let i = acos((pow(r, 2) + pow(Δ!, 2) - pow(R!, 2)) / (2 * r * Δ!))
         return i
+    }
+    
+    /**
+     * Returns the distance of the celestial object to the Sun in meters.
+     *
+     * - Parameter epoch: The epoch (date and time) for which the distance should be
+     * calculated.
+     * - Returns: The distance to the Sun in meters.
+     * - Throws `CelestialObjectException.unspecifiedDistanceException`: when
+     * the distance to the Earth was not specified or is unknown (e.g. for distant stars).
+     */
+    func distanceToTheSun(at epoch: Date) throws -> Double {
+        let rectCoord = try self.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
+        let sunCoord = try Sun.sun.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
+        let Δ = rectCoord.distance
+        let R = sunCoord.distance
+        if Δ == nil || R == nil {
+            throw CelestialObjectException.unspecifiedDistanceException
+        }
+        let r = sqrt(pow(rectCoord.x-sunCoord.x , 2) + pow(rectCoord.y-sunCoord.y , 2) + pow(rectCoord.z-sunCoord.z , 2))
+        return r
     }
     
     /**
@@ -123,6 +145,20 @@ public protocol ExtendedDeepSkyObject: DeepSkyObject {
 
 public protocol SolarSystemObject {
     
+    /**
+     * Calculates the effect of light time (τ) for a specific epoch.
+     *
+     * This effect is due to the fact that the speed of light is finite, it is is time needed for light to travel
+     * from the object to the observer. The position of the object as observed is the position of the object
+     * at the current time subtracted by the effect of light time.
+     *
+     * - Parameter epoch: The epoch (date and time) for which the effect of light time should be
+     * calculated.
+     * - Returns: The effect of light time in seconds.
+     * - Throws: `CelestialObjectException.unspecifiedDistanceException` when the
+     * distance is unknown.
+     */
+    func effectOfLightTime(at epoch: Date) throws -> Double
 }
 
 public class EphemeridesObject: CelestialObject, SolarSystemObject {
@@ -188,6 +224,28 @@ public class EphemeridesObject: CelestialObject, SolarSystemObject {
         let i = try self.phaseAngle(at: epoch)
         let k = (1 + cos(i)) / 2
         return k
+    }
+    
+    /**
+     * Calculates the effect of light time (τ) for a specific epoch.
+     *
+     * This effect is due to the fact that the speed of light is finite, it is is time needed for light to travel
+     * from the object to the observer. The position of the object as observed is the position of the object
+     * at the current time subtracted by the effect of light time.
+     *
+     * - Parameter epoch: The epoch (date and time) for which the effect of light time should be
+     * calculated.
+     * - Returns: The effect of light time in seconds.
+     * - Throws: `CelestialObjectException.unspecifiedDistanceException` when the
+     * distance is unknown.
+     */
+    public func effectOfLightTime(at epoch: Date) throws -> Double {
+        let distance = try self.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS).distance
+        if distance ==  nil {
+            throw CelestialObjectException.unspecifiedDistanceException
+        }
+        let τ = 0.0057755183 * distance! / Units.AU
+        return τ
     }
     
     /**
@@ -394,12 +452,56 @@ public class Planet: EphemeridesObject {
     public static let earth = Planet(name: "Earth")
     public static let mars = Planet(name: "Mars")
     public static let jupiter = Planet(name: "Jupiter")
-    public static let saturn = Planet(name: "Saturn")
+    public static let saturn = Saturn(name: "Saturn")
     public static let uranus = Planet(name: "Uranus")
     public static let neptune = Planet(name: "Neptune")
     
     public override func visualMagnitude(at epoch: Date) throws -> Magnitude {
+        let rectCoord = try self.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
+        let sunCoord = try Sun.sun.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
+        var Δ = rectCoord.distance
+        if Δ == nil {
+            throw CelestialObjectException.unspecifiedDistanceException
+        }
+        var r = sqrt(pow(rectCoord.x-sunCoord.x , 2) + pow(rectCoord.y-sunCoord.y , 2) + pow(rectCoord.z-sunCoord.z , 2))
+        var i = try self.phaseAngle(at: epoch)
+        Δ = Δ! / Units.AU // Distance should be expressed in AU for these formulae.
+        r = r / Units.AU
+        i = i / Units.degree  // The phase angle should be expressed in degrees
+        if self.name == "Mercury" {
+            let mv = -0.42 + 5 * log10(r*Δ!) + 0.0380*i - 0.000273*pow(i, 2) + 0.000002*pow(i, 3)
+            return Magnitude(value: mv)
+        }
+        if self.name == "Venus" {
+            let mv = -4.40 + 5 * log10(r*Δ!) + 0.0009*i + 0.000239*pow(i, 2) - 0.00000065*pow(i, 3)
+            return Magnitude(value: mv)
+        }
+        if self.name == "Mars" {
+            let mv = -1.52 + 5 * log10(r*Δ!) + 0.016*i
+            return Magnitude(value: mv)
+        }
+        if self.name == "Jupiter" {
+            let mv = -9.40 + 5 * log10(r*Δ!) + 0.005*i
+            return Magnitude(value: mv)
+        }
+        // TODO: Calculate magnitude in specific Saturn class
+        if self.name == "Uranus" {
+            let mv = -7.19 + 5 * log10(r*Δ!)
+            return Magnitude(value: mv)
+        }
+        if self.name == "Neptune" {
+            let mv = -6.87 + 5 * log10(r*Δ!)
+            return Magnitude(value: mv)
+        }
+        if self.name == "Pluto" {
+            let mv = -1.00 + 5 * log10(r*Δ!)
+            return Magnitude(value: mv)
+        }
         throw CelestialObjectException.undefinedPropertyException
+    }
+    
+    fileprivate override init(name: String) {
+        super.init(name: name)
     }
     
     /**
@@ -420,11 +522,206 @@ public class Planet: EphemeridesObject {
     }
 }
 
+/**
+ * An instance of this class represents the planet Saturn. Apart from generic parameters such as the position
+ * and magnitude, this class also inculdes functions to calculate the positions of the
+ * rings of Saturn.
+ */
+public class Saturn: Planet {
+    
+    /**
+     * This structure represents data about Saturn's ring system.
+     */
+    public struct SaturnsRing {
+        
+        /**
+         * The inclination of the plane of the rings of Saturn in radians referred to the mean ecliptic and
+         * equinox of a specific epoch.
+         *
+         * Reference: Meeus, Jean, 1998, *Astronomical Algorithms*, Willmann-Bell Inc., second edition.
+         */
+        public let i: Double
+        
+        /**
+         * The geocentric position angle of the northern semiminor axis of the apparent ellipse of Saturn's
+         * ring , measured from North towards the east. The value is given in radians.
+         *
+         * This is also the position angle of the north pole of Saturn as the Ring is in the equatorial plane
+         * of Saturn.
+         *
+         * Reference: Meeus, Jean, 1998, *Astronomical Algorithms*, Willmann-Bell Inc., second edition.
+         */
+        public let P: Double
+        
+        /**
+         * The major axis of the outer edge of the outer ring in radians.
+         *
+         * This axis defines, together with the minor axis, the elliptic projection of Saturn's ring to an
+         * observer on Earth.
+         */
+        public let a: Double
+        
+        /**
+         * The minor axis of the outer edge of the outer ring in radians.
+         *
+         * This axis defines, together with the major axis, the elliptic projection of Saturn's ring to an
+         * observer on Earth.
+         */
+        public let b: Double
+        
+        /**
+         * The Saturnicentric latitude in radians of the Earth reffered to the plane of Saturn's ring system.
+         * This angle is positive to the north.
+         *
+         * When this value is positive, the visible surface of the ring is the northern surface.
+         *
+         * Reference: Meeus, Jean, 1998, *Astronomical Algorithms*, Willmann-Bell Inc., second edition.
+         */
+        public let B: Double
+        
+        /**
+         * The Saturnicentric latitude in radians of the Sun reffered to the plane of Saturn's ring system.
+         * This angle is positive to the north.
+         *
+         * When this value is positive, the illuminated surface of the ring is the northern surface.
+         *
+         * Reference: Meeus, Jean, 1998, *Astronomical Algorithms*, Willmann-Bell Inc., second edition.
+         */
+        public let B´: Double
+        
+        /**
+         * The difference between the Saturnicentric longitudes or the Sun and the Earth.
+         *
+         * This value is needed to calculate the magnitude of Saturn.
+         *
+         * Reference: Meeus, Jean, 1998, *Astronomical Algorithms*, Willmann-Bell Inc., second edition.
+         */
+        public let ΔU: Double
+    }
+    
+    /**
+     * Calculates the inclination of Saturn's equator in radians,  referred to the mean ecliptic and equinox
+     * of the specified epoch.
+     *
+     * This value is equal to the inclination of Saturn's ring system, which is one of the properties calculated
+     * in ``.
+     *
+     * - Parameter epoch: The date for which the inclination should be calculated.
+     * - Returns: The inclination of Saturn's equator.
+     */
+    public func equatorialInclination(at epoch: Date) -> Double {
+        let T = epoch.julianCentury
+        let i = 28.075216 - 0.012998*T + 0.000004*pow(T, 2)
+        return i * Units.degree
+    }
+    
+    /**
+     * Calculates the longitude of the ascending node of Saturn  referred to the mean ecliptic and equinox
+     * of the specified epoch.
+     *
+     * - Parameter epoch: The date for which the longitude should be calculated.
+     * - Returns: The longitude of the ascending node.
+     */
+    public func longitudeOfTheAscendingNode(at epoch: Date) -> Double {
+        let T = epoch.julianCentury
+        let Ω = 169.508470 + 1.394681*T + 0.000412*pow(T, 2)
+        return Ω * Units.degree
+    }
+    
+    /**
+     * Calculates the properties that define Saturn's ring system as viewed by an observer from Earth.
+     *
+     * The algorithm is based on Chapter 45 of Jean Meeus' book on Astronomical Algorithms.
+     *
+     * Reference: Meeus, Jean, 1998, *Astronomical Algorithms*, Willmann-Bell Inc., second edition.
+     *
+     * - Parameter epoch: The date for which the longitude should be calculated.
+     * - Returns: The properties of Saturn's ring system.
+     */
+    public func propertiesOfTheRing(at epoch: Date) throws -> SaturnsRing {
+        // 1
+        let Ω = longitudeOfTheAscendingNode(at: epoch)
+        let i = equatorialInclination(at: epoch)
+        print("Ω = \(Ω/Units.degree)°")
+        
+        // 2
+        let heliocentric = CoordinateFrame.trueEcliptical(origin: .heliocentric, on: epoch)
+        let earthHeliocentricCoord = try Planet.earth.sphericalCoordinates(at: epoch, inCoordinateFrame: heliocentric)
+        let saturnHeliocentricCoord = try self.sphericalCoordinates(at: epoch, inCoordinateFrame: heliocentric)
+        print("Earth Heliocentric \(earthHeliocentricCoord)")
+        print("Saturn Heliocentric \(saturnHeliocentricCoord)")
+        
+        // 3
+        var τ = try self.effectOfLightTime(at: epoch) * Date.lengthOfDay
+        var prevτ = 10000.0
+        let maxτ = 1.0
+        var newEpoch = epoch
+        while fabs(prevτ-τ) > maxτ {
+            newEpoch = Date(timeInterval: -τ, since: epoch)
+            τ = try self.effectOfLightTime(at: newEpoch) * Date.lengthOfDay
+            prevτ = τ
+        }
+        
+        // 4 & 5
+        let geocentric = CoordinateFrame.meanEcliptical(origin: .geocentric, on: newEpoch)
+        let saturnCoord = try self.sphericalCoordinates(at: newEpoch, inCoordinateFrame: geocentric)
+        print("Saturn Geocentric \(saturnCoord) at epoch: \(newEpoch)  τ=\(τ / Date.lengthOfDay)")
+        
+        // 6
+        let B = asin(sin(i)*cos(saturnCoord.latitude)*sin(saturnCoord.longitude-Ω) - cos(i)*sin(saturnCoord.latitude))
+        let a = 375.35/3600*Units.degree / (saturnCoord.distance!/Units.AU)
+        let b = a * sin(fabs(B))
+        
+        // 7
+        let T = newEpoch.julianCentury
+        let N = (113.6655 + 0.8771*T) * Units.degree // longitude of the ascending node of Saturn's orbit.
+        print("N = \(N/Units.degree)°")
+        let lonPrime = saturnHeliocentricCoord.longitude - 0.01759*Units.degree / (saturnHeliocentricCoord.distance!/Units.AU)
+        let latPrime = saturnHeliocentricCoord.latitude - 0.000764*Units.degree*cos(saturnHeliocentricCoord.longitude-N)/saturnHeliocentricCoord.distance!
+        print("l' = \(lonPrime/Units.degree)°  b' = \(latPrime/Units.degree)°")
+        
+        // 8
+        let Bprime = asin(sin(i)*cos(latPrime)*sin(lonPrime-Ω)-cos(i)*sin(latPrime))
+        
+        // 9
+        let U1 = atan((sin(i)*sin(latPrime) + cos(i)*cos(latPrime)*sin(lonPrime-Ω)) / (cos(latPrime)*cos(lonPrime-Ω)))
+        let U2 = atan((sin(i)*sin(saturnCoord.latitude) + cos(i)*cos(saturnCoord.latitude)*sin(saturnCoord.longitude-Ω)) / (cos(saturnCoord.latitude)*cos(saturnCoord.longitude-Ω)))
+        let ΔU = fabs(U1-U2)
+        
+        // 10
+        // TODO: Nutation
+        
+        // 11 Ecliptical longitude and latitude of the northern pole of the ring plane
+        let λ0 = Ω - 0.5*Double.pi
+        let β0 = 0.5*Double.pi - i
+        
+        // 12 Aberration of Saturn
+        let λ = saturnCoord.longitude + 0.005693*Units.degree * cos(earthHeliocentricCoord.longitude-saturnCoord.longitude) / cos(saturnCoord.latitude)
+        let β = saturnCoord.latitude + 0.005693*Units.degree * sin(earthHeliocentricCoord.longitude-saturnCoord.longitude) * sin(saturnCoord.latitude)
+        
+        // 13 Add nutation
+        // TODO: Add nutation to the longitude of the north pole λ0 and to the longitude of Saturn λ
+        
+        // 14 Transform to equatorial coordinates
+        let trueEcliptic = CoordinateFrame.trueEcliptical(on: epoch)
+        let northPole = SphericalCoordinates(longitude: λ0, latitude: β0, distance: saturnCoord.distance, frame: trueEcliptic)
+        let centre = SphericalCoordinates(longitude: λ, latitude: β, distance: saturnCoord.distance, frame: trueEcliptic)
+        let eqNorthPole = try northPole.transform(to: .ICRS, at: epoch)
+        let eqCentre = try centre.transform(to: .ICRS, at: epoch)
+        
+        // 15 Position angle
+        let P = tan((cos(eqNorthPole.latitude)*sin(eqNorthPole.longitude-eqCentre.longitude)) / (sin(eqNorthPole.latitude)*cos(eqCentre.latitude) - cos(eqNorthPole.latitude)*sin(eqCentre.latitude)*cos(eqNorthPole.longitude-eqCentre.longitude)))
+        
+        let props = SaturnsRing(i: i, P: P, a: a, b: b, B: B, B´: Bprime, ΔU: ΔU)
+        return props
+    }
+}
+
 public protocol DwarfPlanet: Planet {
     
 }
 
-public protocol MinorPlants: SolarSystemObject {
+public protocol MinorPlanet: SolarSystemObject {
     
 }
 

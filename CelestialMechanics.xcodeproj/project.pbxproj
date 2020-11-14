@@ -35,6 +35,7 @@
 		C7D7031F2546DAFD0090DB36 /* Interpolation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D7031E2546DAFD0090DB36 /* Interpolation.swift */; };
 		C7D70325254710C80090DB36 /* Date+CMextensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D70324254710C80090DB36 /* Date+CMextensions.swift */; };
 		C7D70329254716720090DB36 /* Ephemerides.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D70328254716720090DB36 /* Ephemerides.swift */; };
+		C7E221B6255BCD81002D2D85 /* Units.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7E221B5255BCD81002D2D85 /* Units.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -79,6 +80,7 @@
 		C7D7031E2546DAFD0090DB36 /* Interpolation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interpolation.swift; sourceTree = "<group>"; };
 		C7D70324254710C80090DB36 /* Date+CMextensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+CMextensions.swift"; sourceTree = "<group>"; };
 		C7D70328254716720090DB36 /* Ephemerides.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ephemerides.swift; sourceTree = "<group>"; };
+		C7E221B5255BCD81002D2D85 /* Units.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Units.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -189,6 +191,7 @@
 			isa = PBXGroup;
 			children = (
 				C7D7031E2546DAFD0090DB36 /* Interpolation.swift */,
+				C7E221B5255BCD81002D2D85 /* Units.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -319,6 +322,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C7D703172546CF360090DB36 /* CelestialObject.swift in Sources */,
+				C7E221B6255BCD81002D2D85 /* Units.swift in Sources */,
 				C7D70329254716720090DB36 /* Ephemerides.swift in Sources */,
 				C7D7031B2546CF550090DB36 /* Coordinates.swift in Sources */,
 				C779687A254B7835003179E2 /* Types.swift in Sources */,

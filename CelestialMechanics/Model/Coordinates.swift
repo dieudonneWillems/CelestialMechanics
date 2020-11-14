@@ -224,6 +224,14 @@ public struct CoordinateFrame : Equatable {
         return CoordinateFrame(type: .FK5, equinox: epoch)
     }
     
+    public static func meanEcliptical(origin: CoordinateFrameOrigin = .geocentric, on epoch: Date) -> CoordinateFrame {
+        return CoordinateFrame(type: .meanEcliptical, origin: origin, equinox: epoch)
+    }
+    
+    public static func trueEcliptical(origin: CoordinateFrameOrigin = .geocentric, on epoch: Date) -> CoordinateFrame {
+        return CoordinateFrame(type: .trueEcliptical, origin: origin, equinox: epoch)
+    }
+    
     /*
     case galactic
     case fk4(equinox: Date)
@@ -237,7 +245,7 @@ public struct CoordinateFrame : Equatable {
     public let equinox: Date?
     public let origin: CoordinateFrameOrigin
     
-    private init(type: CoordinateFrameType, origin: CoordinateFrameOrigin = .geocentric, equinox: Date?) {
+    init(type: CoordinateFrameType, origin: CoordinateFrameOrigin = .geocentric, equinox: Date?) {
         self.type = type
         self.equinox = equinox
         self.origin = origin
@@ -501,7 +509,7 @@ public struct RectangularCoordinates {
     public var distance: Double? {
         get {
             var d : Double? = sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2))
-            if d! < 1.1 {
+            if d! < 1.1 && d! > 0.1 {
                 d = nil
             }
             return d
@@ -626,36 +634,33 @@ public struct RectangularCoordinates {
             let rotationFactors = try RectangularCoordinates.rotationFactors(for: coordinates.frame, at: coordinates.frame.equinox)
             newCoordinates = RectangularCoordinates.rotateToGalactic(coordinates: newCoordinates, rotationFactors: rotationFactors)
         }
-        if frame != .galactic {
-            let rotationFactors = try RectangularCoordinates.rotationFactors(for: frame, at: frame.equinox)
-            newCoordinates = RectangularCoordinates.rotateFromGalactic(coordinates: newCoordinates, rotationFactors: rotationFactors)
-        }
         
         // Transformation to correct origin. If the distance is not known, the
         // distance is assumed to be so large that the translation is negligable.
         if coordinates.frame.origin != frame.origin && coordinates.distanceIsKnown {
+            let sunCoord = try Sun.sun.rectangularCoordinates(at: epoch, inCoordinateFrame: .galactic)
             // Transformation from original origin to geocentric
             if coordinates.frame.origin == .heliocentric {
-                let sunCoord = try Sun.sun.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
                 newCoordinates.x = sunCoord.x - newCoordinates.x
                 newCoordinates.y = sunCoord.y - newCoordinates.y
                 newCoordinates.z = sunCoord.z - newCoordinates.z
             }
-            // TODO: Transformation from topoccentric coordinates
+            // TODO: Transformation from topocentric coordinates
             // Transformation from geocentric to target origin.
             if frame.origin == .heliocentric {
-                let sunCoord = try Sun.sun.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
                 newCoordinates.x = newCoordinates.x - sunCoord.x
                 newCoordinates.y = newCoordinates.y - sunCoord.y
                 newCoordinates.z = newCoordinates.z - sunCoord.z
             }
             // TODO: Transformation to topoccentric coordinates
         }
+        
+        if frame != .galactic {
+            let rotationFactors = try RectangularCoordinates.rotationFactors(for: frame, at: frame.equinox)
+            newCoordinates = RectangularCoordinates.rotateFromGalactic(coordinates: newCoordinates, rotationFactors: rotationFactors)
+        }
         return RectangularCoordinates(x: newCoordinates.x, y: newCoordinates.y, z: newCoordinates.z, frame: frame)
     }
-    
-    fileprivate static let AU : Double = 149597870700.0
-    fileprivate static let pc : Double = 30856775814913673.0
     
     fileprivate static func distanceDescription(distance: Double) -> String {
         if distance < 1000 {
@@ -664,15 +669,15 @@ public struct RectangularCoordinates {
         if distance < 1000000 {
             return "\(distance/1000.0) km"
         }
-        if distance < RectangularCoordinates.pc/1000 {
-            return "\(distance/RectangularCoordinates.AU) AU"
+        if distance < Units.pc/1000 {
+            return "\(distance/Units.AU) AU"
         }
-        if distance < RectangularCoordinates.pc*900 {
-            return "\(distance/RectangularCoordinates.pc) pc"
+        if distance < Units.pc*900 {
+            return "\(distance/Units.pc) pc"
         }
-        if distance < RectangularCoordinates.pc*900000 {
-            return "\(distance/RectangularCoordinates.pc/1000.0) kpc"
+        if distance < Units.pc*900000 {
+            return "\(distance/Units.pc/1000.0) kpc"
         }
-        return "\(distance/RectangularCoordinates.pc/1000000.0) Mpc"
+        return "\(distance/Units.pc/1000000.0) Mpc"
     }
 }
