@@ -62,6 +62,29 @@ class SolarSystemTestCase: XCTestCase {
         XCTAssertTrue(fabs(try venus.visualMagnitude(at: epoch).value - -4.0) < 0.1)
         XCTAssertTrue(fabs(try venus.illuminatedFraction(at: epoch) - 0.867) < 0.001)
     }
+    
+    func testSaturnsRing() throws {
+        let calendar = Calendar.current
+        var dateComponents = DateComponents()
+        dateComponents.year = 1992
+        dateComponents.month = 12
+        dateComponents.day = 16
+        dateComponents.timeZone = TimeZone(abbreviation: "GMT")
+        dateComponents.hour = 0
+        dateComponents.minute = 0
+        dateComponents.second = 0
+        let date = calendar.date(from: dateComponents)!
+        let saturn = Planet.saturn
+        let ring = try saturn.propertiesOfTheRing(at: date)
+    
+        XCTAssertTrue(fabs(ring.B/Units.degree - 16.442) < 0.001, "B = \(ring.B/Units.degree)°")
+        XCTAssertTrue(fabs(ring.B´/Units.degree - 14.679) < 0.001, "B´ = \(ring.B´/Units.degree)°")
+        XCTAssertTrue(fabs(ring.a/Units.degree*3600 - 35.87) < 0.01, "a = \(ring.a/Units.degree*3600)\"")
+        XCTAssertTrue(fabs(ring.b/Units.degree*3600 - 10.15) < 0.01, "b = \(ring.B/Units.degree*3600)\"")
+        XCTAssertTrue(fabs(ring.i/Units.degree - 28.076131) < 0.000001, "i = \(ring.i/Units.degree)°")
+        XCTAssertTrue(fabs(ring.P/Units.degree - 6.741) < 0.001, "P = \(ring.P/Units.degree)°")
+        XCTAssertTrue(fabs(ring.ΔU/Units.degree - 4.198) < 0.001, "ΔU = \(ring.ΔU/Units.degree)°")
+    }
 
     func testPerformanceMoonCoordinates() throws {
         // This is an example of a performance test case.
