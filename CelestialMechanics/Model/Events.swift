@@ -8,7 +8,9 @@
 import Foundation
 
 
-public struct AstronomicalEvent : CustomStringConvertible, Equatable {
+public struct AstronomicalEvent : CustomStringConvertible, Equatable, Identifiable {
+    
+    public let id: UUID = UUID()
     
     public static let civilTwilightTresshold = 6.0/Double.rpi
     public static let nauticalTwilightTresshold = 12.0/Double.rpi
