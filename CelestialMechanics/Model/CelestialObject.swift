@@ -642,37 +642,43 @@ public class Saturn: Planet {
         // 1
         let Ω = longitudeOfTheAscendingNode(at: epoch)
         let i = equatorialInclination(at: epoch)
+        print("Ω = \(Ω/Units.degree)°")
         
         // 2
-        let heliocentric = CoordinateFrame.meanEcliptical(origin: .heliocentric, on: epoch)
+        let heliocentric = CoordinateFrame.trueEcliptical(origin: .heliocentric, on: epoch)
         let earthHeliocentricCoord = try Planet.earth.sphericalCoordinates(at: epoch, inCoordinateFrame: heliocentric)
         let saturnHeliocentricCoord = try self.sphericalCoordinates(at: epoch, inCoordinateFrame: heliocentric)
+        print("Earth Heliocentric \(earthHeliocentricCoord)")
+        print("Saturn Heliocentric \(saturnHeliocentricCoord)")
         
         // 3
-        var τ = try self.effectOfLightTime(at: epoch)
+        var τ = try self.effectOfLightTime(at: epoch) * Date.lengthOfDay
         var prevτ = 10000.0
         let maxτ = 1.0
         var newEpoch = epoch
         while fabs(prevτ-τ) > maxτ {
             newEpoch = Date(timeInterval: -τ, since: epoch)
-            τ = try self.effectOfLightTime(at: newEpoch)
+            τ = try self.effectOfLightTime(at: newEpoch) * Date.lengthOfDay
             prevτ = τ
         }
         
         // 4 & 5
-        let geocentric = CoordinateFrame.meanEcliptical(origin: .heliocentric, on: newEpoch)
+        let geocentric = CoordinateFrame.meanEcliptical(origin: .geocentric, on: newEpoch)
         let saturnCoord = try self.sphericalCoordinates(at: newEpoch, inCoordinateFrame: geocentric)
+        print("Saturn Geocentric \(saturnCoord) at epoch: \(newEpoch)  τ=\(τ / Date.lengthOfDay)")
         
         // 6
         let B = asin(sin(i)*cos(saturnCoord.latitude)*sin(saturnCoord.longitude-Ω) - cos(i)*sin(saturnCoord.latitude))
-        let a = 375.35/saturnCoord.distance!/3600*Units.degree
+        let a = 375.35/3600*Units.degree / (saturnCoord.distance!/Units.AU)
         let b = a * sin(fabs(B))
         
         // 7
         let T = newEpoch.julianCentury
-        let N = 113.6655 + 0.8771*T // longitude of the ascending node of Saturn's orbit.
-        let lonPrime = saturnCoord.longitude - 0.01759*Units.degree/saturnHeliocentricCoord.distance!
-        let latPrime = saturnCoord.latitude - 0.000764*Units.degree*cos(saturnHeliocentricCoord.longitude-N)/saturnHeliocentricCoord.distance!
+        let N = (113.6655 + 0.8771*T) * Units.degree // longitude of the ascending node of Saturn's orbit.
+        print("N = \(N/Units.degree)°")
+        let lonPrime = saturnHeliocentricCoord.longitude - 0.01759*Units.degree / (saturnHeliocentricCoord.distance!/Units.AU)
+        let latPrime = saturnHeliocentricCoord.latitude - 0.000764*Units.degree*cos(saturnHeliocentricCoord.longitude-N)/saturnHeliocentricCoord.distance!
+        print("l' = \(lonPrime/Units.degree)°  b' = \(latPrime/Units.degree)°")
         
         // 8
         let Bprime = asin(sin(i)*cos(latPrime)*sin(lonPrime-Ω)-cos(i)*sin(latPrime))
