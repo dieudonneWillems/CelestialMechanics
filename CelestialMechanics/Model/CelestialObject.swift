@@ -484,7 +484,7 @@ public class Planet: EphemeridesObject {
             let mv = -9.40 + 5 * log10(r*Δ!) + 0.005*i
             return Magnitude(value: mv)
         }
-        // TODO: Calculate magnitude in specific Saturn class
+        // Saturn handled by `Saturn` instance.
         if self.name == "Uranus" {
             let mv = -7.19 + 5 * log10(r*Δ!)
             return Magnitude(value: mv)
@@ -599,6 +599,22 @@ public class Saturn: Planet {
         public let ΔU: Double
     }
     
+    public override func visualMagnitude(at epoch: Date) throws -> Magnitude {
+        let rectCoord = try self.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
+        let sunCoord = try Sun.sun.rectangularCoordinates(at: epoch, inCoordinateFrame: .ICRS)
+        var Δ = rectCoord.distance
+        if Δ == nil {
+            throw CelestialObjectException.unspecifiedDistanceException
+        }
+        var r = sqrt(pow(rectCoord.x-sunCoord.x , 2) + pow(rectCoord.y-sunCoord.y , 2) + pow(rectCoord.z-sunCoord.z , 2))
+        Δ = Δ! / Units.AU // Distance should be expressed in AU for these formulae.
+        r = r / Units.AU
+        let ring = try self.propertiesOfTheRing(at: epoch)
+        let ΔU = ring.ΔU / Units.degree
+        let mv = -8.88 + 5 * log10(r*Δ!) + 0.044*fabs(ΔU) - 2.6*sin(fabs(ring.B)) + 1.25*pow(sin(ring.B), 2)
+        return Magnitude(value: mv)
+    }
+    
     /**
      * Calculates the inclination of Saturn's equator in radians,  referred to the mean ecliptic and equinox
      * of the specified epoch.
@@ -642,14 +658,11 @@ public class Saturn: Planet {
         // 1
         let Ω = longitudeOfTheAscendingNode(at: epoch)
         let i = equatorialInclination(at: epoch)
-        print("Ω = \(Ω/Units.degree)°")
         
         // 2
         let heliocentric = CoordinateFrame.trueEcliptical(origin: .heliocentric, on: epoch)
         let earthHeliocentricCoord = try Planet.earth.sphericalCoordinates(at: epoch, inCoordinateFrame: heliocentric)
         let saturnHeliocentricCoord = try self.sphericalCoordinates(at: epoch, inCoordinateFrame: heliocentric)
-        print("Earth Heliocentric \(earthHeliocentricCoord)")
-        print("Saturn Heliocentric \(saturnHeliocentricCoord)")
         
         // 3
         var τ = try self.effectOfLightTime(at: epoch) * Date.lengthOfDay
@@ -665,7 +678,6 @@ public class Saturn: Planet {
         // 4 & 5
         let geocentric = CoordinateFrame.meanEcliptical(origin: .geocentric, on: newEpoch)
         let saturnCoord = try self.sphericalCoordinates(at: newEpoch, inCoordinateFrame: geocentric)
-        print("Saturn Geocentric \(saturnCoord) at epoch: \(newEpoch)  τ=\(τ / Date.lengthOfDay)")
         
         // 6
         let B = asin(sin(i)*cos(saturnCoord.latitude)*sin(saturnCoord.longitude-Ω) - cos(i)*sin(saturnCoord.latitude))
@@ -675,10 +687,8 @@ public class Saturn: Planet {
         // 7
         let T = newEpoch.julianCentury
         let N = (113.6655 + 0.8771*T) * Units.degree // longitude of the ascending node of Saturn's orbit.
-        print("N = \(N/Units.degree)°")
         let lonPrime = saturnHeliocentricCoord.longitude - 0.01759*Units.degree / (saturnHeliocentricCoord.distance!/Units.AU)
         let latPrime = saturnHeliocentricCoord.latitude - 0.000764*Units.degree*cos(saturnHeliocentricCoord.longitude-N)/saturnHeliocentricCoord.distance!
-        print("l' = \(lonPrime/Units.degree)°  b' = \(latPrime/Units.degree)°")
         
         // 8
         let Bprime = asin(sin(i)*cos(latPrime)*sin(lonPrime-Ω)-cos(i)*sin(latPrime))
